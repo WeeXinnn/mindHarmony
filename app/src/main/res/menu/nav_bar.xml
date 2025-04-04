@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/home"
+        android:title="@string/home"/>
+
+    <item
+        android:id="@+id/nav_meditation"
+        android:icon="@drawable/meditation"
+        android:title="@string/meditation"/>
+
+    <item
+        android:id="@+id/nav_plan"
+        android:icon="@drawable/plan"
+        android:title="@string/plan"/>
+
+    <item
+        android:id="@+id/nav_mood"
+        android:icon="@drawable/pen"
+        android:title="@string/mood"/>
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/user"
+        android:title="@string/profile"/>
+</menu>

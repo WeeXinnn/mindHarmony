@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">mindHarmony</string>
+    <string name="profile">Profile</string>
+    <string name="mood">Mood</string>
+    <string name="plan">Plan</string>
+    <string name="meditation">Meditation</string>
+    <string name="home">Home</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="user_well_being_tracking">User Well Being Tracking</string>
+    <string name="Meditation">Meditation</string>
+    <string name="wellness_plan_content">Wellness Plan Content</string>
+    <string name="ai_chatbot">AI Chatbot</string>
 </resources>
