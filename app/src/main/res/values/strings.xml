@@ -11,4 +11,16 @@
     <string name="Meditation">Meditation</string>
     <string name="wellness_plan_content">Wellness Plan Content</string>
     <string name="ai_chatbot">AI Chatbot</string>
+    <string name="unplug_reset"><![CDATA[Unplug & Reset]]></string>
+    <string name="boost_your_vibe">Boost Your Vibe</string>
+    <string name="connect_chill"><![CDATA[Connect & Chill]]></string>
+    <string name="move_your_mood">Move your mood</string>
+    <string name="back">Back</string>
+    <string name="view_my_plan">View My Plan</string>
+    <string name="create_plan">Create Plan</string>
+    <string name="achievements">Achievements</string>
+    <string name="wellness_plan">Wellness Plan</string>
+    <string name="greeting">Greeting</string>
+    <string name="subtitle">Let\'s create your daily wellness plan to kickstart some good vibes.</string>
+    <string name="badge">Badge</string>
 </resources>
