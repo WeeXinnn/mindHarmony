@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/white"
+    >
 
-    <!-- Top App Bar with Back Button -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -25,7 +26,6 @@
             android:textStyle="bold" />
     </androidx.appcompat.widget.Toolbar>
 
-    <!-- Greeting Card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_greeting"
         android:layout_width="0dp"
@@ -63,7 +63,6 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Action Buttons -->
     <LinearLayout
         android:id="@+id/layout_buttons"
         android:layout_width="match_parent"
@@ -105,7 +104,7 @@
             android:textSize="12sp" />
 
         <Button
-            android:id="@+id/btn_achievements"
+            android:id="@+id/btn_badge"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -118,8 +117,6 @@
             />
     </LinearLayout>
 
-
-    <!-- Category Header -->
     <TextView
         android:id="@+id/tv_category"
         android:layout_width="wrap_content"
@@ -133,7 +130,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layout_buttons" />
 
-    <!-- Grid for Categories -->
     <GridLayout
         android:id="@+id/grid_categories"
         android:layout_width="0dp"
@@ -147,7 +143,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_category">
 
-        <!-- Move Your Mood -->
         <androidx.cardview.widget.CardView
             android:id="@+id/card_mood"
             android:layout_width="0dp"
@@ -182,7 +177,6 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Connect & Chill -->
         <androidx.cardview.widget.CardView
             android:id="@+id/card_connect"
             android:layout_width="0dp"
@@ -217,7 +211,6 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Unplug & Reset -->
         <androidx.cardview.widget.CardView
             android:id="@+id/card_unplug"
             android:layout_width="0dp"
@@ -252,7 +245,6 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Boost your vibe -->
         <androidx.cardview.widget.CardView
             android:id="@+id/card_vibe"
             android:layout_width="0dp"

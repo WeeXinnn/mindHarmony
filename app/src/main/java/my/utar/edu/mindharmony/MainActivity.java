@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
 
         navBar = findViewById(R.id.bottom_navigation);
 
-        //home page
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new chatbot())
                 .commit();
@@ -38,13 +37,11 @@ public class MainActivity extends AppCompatActivity {
 
         navBar.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = fragmentMap.get(item.getItemId());
-
             if (selectedFragment != null) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, selectedFragment)
                         .commit();
             }
-
             return true;
         });
     }

@@ -1,28 +1,22 @@
 package my.utar.edu.mindharmony.wellnessplan;
 
+import android.content.Intent;
 import android.os.Bundle;
-
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import my.utar.edu.mindharmony.wellnessplan.Questionnaire;
 
 import my.utar.edu.mindharmony.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link plan#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class plan extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -30,15 +24,6 @@ public class plan extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment plan.
-     */
-    // TODO: Rename and change types and number of parameters
     public static plan newInstance(String param1, String param2) {
         plan fragment = new plan();
         Bundle args = new Bundle();
@@ -60,7 +45,35 @@ public class plan extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_plan, container, false);
+        View view = inflater.inflate(R.layout.fragment_plan, container, false);
+
+        // Find CardViews from the layout
+        CardView cardMood = view.findViewById(R.id.card_mood);
+        CardView cardConnect = view.findViewById(R.id.card_connect);
+        CardView cardUnplug = view.findViewById(R.id.card_unplug);
+        CardView cardVibe = view.findViewById(R.id.card_vibe);
+
+        Button createPlanBtn = view.findViewById(R.id.btn_create_plan);
+        Button viewplan = view.findViewById(R.id.btn_view_plan);
+        Button badgeBtn = view.findViewById(R.id.btn_badge);
+
+        // Set onClick listeners
+        cardMood.setOnClickListener(v -> openCategory("Move Your Mood"));
+        cardConnect.setOnClickListener(v -> openCategory("Connect & Chill"));
+        cardUnplug.setOnClickListener(v -> openCategory("Unplug & Reset"));
+        cardVibe.setOnClickListener(v -> openCategory("Boost Your Vibe"));
+
+        createPlanBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), Questionnaire.class);
+            startActivity(intent);
+        });
+
+        return view;
+    }
+
+    private void openCategory(String categoryName) {
+        Intent intent = new Intent(getActivity(), CategoryActivity.class);
+        intent.putExtra("category_name", categoryName);
+        startActivity(intent);
     }
 }
