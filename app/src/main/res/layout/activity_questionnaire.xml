@@ -5,155 +5,168 @@
 
     <LinearLayout
         android:orientation="vertical"
-        android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/questionnaireTitle"
-            android:text="@string/questionnaire"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="24dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/q1"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
-
-        <RadioGroup
-            android:id="@+id/stressorGroup"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <RadioButton
-                android:id="@+id/stressorSchool"
-                android:text="@string/school"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
-            <RadioButton
-                android:id="@+id/stressorFriends"
-                android:text="@string/friends"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
-            <RadioButton
-                android:id="@+id/stressorFamily"
-                android:layout_height="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="0dp"
+            android:layout_marginBottom="16dp">
+            <TextView
+                android:id="@+id/questionnaireTitle"
+                android:text="@string/questionnaire"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_gravity="center_horizontal"
                 android:layout_width="wrap_content"
-                android:text="@string/family"/>
-            <RadioButton
-                android:id="@+id/stressorOther"
-                android:text="@string/other"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
-        </RadioGroup>
+                android:layout_height="wrap_content" />
+        </androidx.appcompat.widget.Toolbar>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/q2"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"/>
-
-        <RadioGroup
-            android:id="@+id/moodGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <RadioButton
-                android:id="@+id/moodStressed"
-                android:text="@string/stressed"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
-            <RadioButton
-                android:id="@+id/moodSad"
-                android:text="@string/sad"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
-            <RadioButton
-                android:id="@+id/moodHappy"
-                android:text="@string/happy"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
-        </RadioGroup>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/q3"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"/>
-
-        <CheckBox
-            android:id="@+id/interestSports"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sports" />
-
-        <CheckBox
-            android:id="@+id/interestSocializing"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/socializing" />
-
-        <CheckBox
-            android:id="@+id/interestCreativity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/creativity" />
-
-        <CheckBox
-            android:id="@+id/interestMindfulness"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/mindfulness" />
-
-        <CheckBox
-            android:id="@+id/interestOutdoor"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/outdoor_activities" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/q4"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"/>
-
-        <RadioGroup
-            android:id="@+id/timeGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <RadioButton
-                android:id="@+id/time5"
-                android:text="@string/_5_minutes"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
-            <RadioButton
-                android:id="@+id/time15"
-                android:text="@string/_15_minutes"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
-            <RadioButton
-                android:id="@+id/time30"
-                android:text="@string/_30_minutes_or_more"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
-        </RadioGroup>
-
-        <Button
-            android:id="@+id/submitBtn"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/create_my_plan"
-            android:layout_marginTop="24dp"/>
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/q1"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioGroup
+                android:id="@+id/stressorGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <RadioButton
+                    android:id="@+id/stressorSchool"
+                    android:text="@string/school"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+                <RadioButton
+                    android:id="@+id/stressorFriends"
+                    android:text="@string/friends"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+                <RadioButton
+                    android:id="@+id/stressorFamily"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/family"/>
+                <RadioButton
+                    android:id="@+id/stressorOther"
+                    android:text="@string/other"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/q2"
+                android:textSize="16sp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioGroup
+                android:id="@+id/moodGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <RadioButton
+                    android:id="@+id/moodStressed"
+                    android:text="@string/stressed"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+                <RadioButton
+                    android:id="@+id/moodSad"
+                    android:text="@string/sad"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+                <RadioButton
+                    android:id="@+id/moodHappy"
+                    android:text="@string/happy"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/q3"
+                android:textSize="16sp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
+
+            <CheckBox
+                android:id="@+id/interestSports"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sports" />
+
+            <CheckBox
+                android:id="@+id/interestSocializing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/socializing" />
+
+            <CheckBox
+                android:id="@+id/interestCreativity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/creativity" />
+
+            <CheckBox
+                android:id="@+id/interestMindfulness"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mindfulness" />
+
+            <CheckBox
+                android:id="@+id/interestOutdoor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/outdoor_activities" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/q4"
+                android:textSize="16sp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioGroup
+                android:id="@+id/timeGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <RadioButton
+                    android:id="@+id/time5"
+                    android:text="@string/_5_minutes"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+                <RadioButton
+                    android:id="@+id/time15"
+                    android:text="@string/_15_minutes"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+                <RadioButton
+                    android:id="@+id/time30"
+                    android:text="@string/_30_minutes_or_more"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
+            </RadioGroup>
+
+            <Button
+                android:id="@+id/submitBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/create_my_plan"
+                android:layout_marginTop="24dp"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

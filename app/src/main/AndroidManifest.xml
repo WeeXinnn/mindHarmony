@@ -13,6 +13,12 @@
         android:theme="@style/Theme.MindHarmony"
         tools:targetApi="31">
         <activity
+            android:name=".wellnessplan.Badge"
+            android:exported="false" />
+        <activity
+            android:name=".wellnessplan.ViewPlan"
+            android:exported="false" />
+        <activity
             android:name=".wellnessplan.Questionnaire"
             android:exported="false" />
         <activity

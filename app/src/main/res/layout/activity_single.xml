@@ -4,70 +4,72 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white"
-    android:gravity="center">
-
-    <androidx.cardview.widget.CardView
+    >
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:elevation="0dp">
+    </androidx.appcompat.widget.Toolbar>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
         android:layout_gravity="center"
-        app:cardBackgroundColor="@color/light_yellow"
-        app:cardCornerRadius="20dp"
-        >
+        android:gravity="center">
 
-        <LinearLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="6dp">
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardBackgroundColor="@color/light_yellow"
+            app:cardCornerRadius="20dp">
 
-            <TextView
-                android:id="@+id/activityName"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textStyle="normal"
-                android:text="@string/activity_name"
-                android:gravity="center_horizontal"
-                />
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_margin="12dp"
-                android:layout_gravity="center"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="20dp"
-                >
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="6dp">
                 <TextView
-                    android:id="@+id/activityDesc"
+                    android:id="@+id/activityName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    android:textStyle="normal"
-                    android:text="@string/description"
                     android:gravity="center_horizontal"
-                    android:layout_marginTop="16dp"
+                    android:text="@string/activity_name"
+                    android:textSize="20sp"
+                    android:textStyle="normal" />
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
                     android:layout_gravity="center"
-                    android:padding="6dp"
-                    />
+                    android:layout_margin="12dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="20dp">
 
-            </androidx.cardview.widget.CardView>
+                    <TextView
+                        android:id="@+id/activityDesc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center_horizontal"
+                        android:padding="6dp"
+                        android:text="@string/description"
+                        android:textSize="20sp"
+                        android:textStyle="normal" />
 
-
-            <Button
-                android:id="@+id/completeBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/complete"
-                android:layout_gravity="center"
-                android:backgroundTint="@color/green">
-
-            </Button>
-
-
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
+                </androidx.cardview.widget.CardView>
+                <Button
+                    android:id="@+id/completeBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:backgroundTint="@color/green"
+                    android:text="@string/complete">
+                </Button>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
 </LinearLayout>

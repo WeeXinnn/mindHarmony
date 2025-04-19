@@ -12,14 +12,12 @@ public class Activity {
     private String description;
     private String category;
 
-    // Constructor
     public Activity(String name, String description, String category) {
         this.name = name;
         this.description = description;
         this.category = category;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }

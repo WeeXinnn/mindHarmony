@@ -1,6 +1,7 @@
 package my.utar.edu.mindharmony.wellnessplan;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,6 +21,16 @@ public class Questionnaire extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_questionnaire);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         stressorGroup = findViewById(R.id.stressorGroup);
         moodGroup = findViewById(R.id.moodGroup);
@@ -53,7 +64,13 @@ public class Questionnaire extends AppCompatActivity {
         if (interestMindfulness.isChecked()) interests.add("Mindfulness");
         if (interestOutdoor.isChecked()) interests.add("Outdoor");
 
+        if (stressor.isEmpty() || mood.isEmpty() || time.isEmpty() || interests.isEmpty()) {
+            Toast.makeText(this, "Please complete all the question.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String interestStr = android.text.TextUtils.join(",", interests);
+
 
         SharedPreferences prefs = getSharedPreferences("UserWellnessPlan", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();

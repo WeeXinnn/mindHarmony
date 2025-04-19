@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,21 +19,30 @@ import my.utar.edu.mindharmony.models.Activity;
 public class CategoryActivity extends AppCompatActivity {
     private static final String TAG = "CategoryActivity";
     public static final String CATEGORY_KEY = "category_name";
-    private RecyclerView recyclerView;
     private ActivityAdapter adapter;
-    private TextView title;
-    private String categoryName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_category);
 
-        categoryName = getIntent().getStringExtra(CATEGORY_KEY);
-        title = findViewById(R.id.categoryTitle);
-        title.setText("Category: " + categoryName);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        recyclerView = findViewById(R.id.recyclerView);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
+        TextView categoryTitle = findViewById(R.id.categoryTitle);
+        String categoryName = getIntent().getStringExtra("category_name");
+        if (categoryName != null) {
+            categoryTitle.setText(categoryName);
+        }
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new ActivityAdapter();
@@ -42,6 +52,7 @@ public class CategoryActivity extends AppCompatActivity {
     }
 
     private void loadActivitiesByCategory(String category) {
+        //load database in background
         AsyncTask.execute(() -> {
             AppDatabase db = AppDatabase.getInstance(getApplicationContext());
             ActivityDao activityDao = db.activityDao();

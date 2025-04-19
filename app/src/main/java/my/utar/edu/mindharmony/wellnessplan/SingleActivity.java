@@ -1,6 +1,8 @@
 package my.utar.edu.mindharmony.wellnessplan;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
@@ -27,6 +29,16 @@ public class SingleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
         activityNameText = findViewById(R.id.activityName);
         activityDescText = findViewById(R.id.activityDesc);
         completeBtn = findViewById(R.id.completeBtn);
@@ -41,6 +53,7 @@ public class SingleActivity extends AppCompatActivity {
         if (hasCompletedToday(activityName)) {
             completeBtn.setEnabled(false);
             completeBtn.setText("Completed");
+            completeBtn.setBackgroundColor(getResources().getColor(R.color.grey));
         }
 
         completeBtn.setOnClickListener(v -> {

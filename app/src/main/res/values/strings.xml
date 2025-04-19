@@ -48,4 +48,13 @@
     <string name="_15_minutes">15 minutes</string>
     <string name="_30_minutes_or_more">30 minutes or more</string>
     <string name="create_my_plan">Create My Plan</string>
+    <string name="badge_and_archievement">Badge and Archievement</string>
+    <string name="badge_unlocked">Badge Unlocked</string>
+    <string name="earn_50_points">Earn 50 Points</string>
+    <string name="_0">0%</string>
+    <string name="earn_500_points">Earn 500 Points</string>
+    <string name="streak_50_days">Streak 50 Days</string>
+    <string name="today_s_completed_activities">Today\'s completed activities:</string>
+    <string name="total_points">Total points:</string>
+    <string name="Category">Category</string>
 </resources>
