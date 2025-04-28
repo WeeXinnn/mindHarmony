@@ -119,66 +119,31 @@ public class Badge extends AppCompatActivity {
 
             // If last completion was today or yesterday, check streak
             if (diffDays == 0 || diffDays == 1) {
-                // Check if all activities were completed on the last completion date
                 boolean completedAll = dailyCompletionCount >= activitiesPerDay;
 
-                if (lastStreakDate.isEmpty()) {
-                    // First streak calculation
-                    if (completedAll && diffDays == 0) {
-                        userPrefs.edit()
-                                .putInt(STREAK_COUNT_KEY, 1)
-                                .putString(LAST_STREAK_DATE_KEY, today)
-                                .apply();
-                        return 1;
-                    }
-                    return 0;
-                }
-
-                Date lastStreak = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(lastStreakDate);
-                long streakDiff = (todayDate.getTime() - lastStreak.getTime()) / (24 * 60 * 60 * 1000);
-
-                if (diffDays == 0) {
-                    // Same day as last completion
-                    if (completedAll && streakDiff == 0) {
-                        userPrefs.edit()
-                                .putInt(STREAK_COUNT_KEY, 1)
-                                .putString(LAST_STREAK_DATE_KEY, today)
-                                .apply();
-                        return 1;
-                    }
-                    return currentStreak;
-                } else if (diffDays == 1) {
-                    // Consecutive day
-                    if (completedAll) {
-                        currentStreak++;
-                        userPrefs.edit()
-                                .putInt(STREAK_COUNT_KEY, currentStreak)
-                                .putString(LAST_STREAK_DATE_KEY, lastCompletionDate)
-                                .apply();
-                        return currentStreak;
+                if (completedAll) {
+                    if (lastStreakDate.isEmpty()) {
+                        currentStreak = 1;
                     } else {
-                        userPrefs.edit()
-                                .putInt(STREAK_COUNT_KEY, 0)
-                                .putString(LAST_STREAK_DATE_KEY, lastCompletionDate)
-                                .apply();
-                        return 0;
+                        Date lastStreak = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(lastStreakDate);
+                        long streakDiff = (todayDate.getTime() - lastStreak.getTime()) / (24 * 60 * 60 * 1000);
+
+                        if (streakDiff == 0) {
+                        } else if (streakDiff == 1) {
+                            currentStreak++;
+                        } else {
+                            currentStreak = 1;
+                        }
                     }
                 } else {
-                    // Missed a day
-                    if (completedAll && diffDays <= 1) {
-                        userPrefs.edit()
-                                .putInt(STREAK_COUNT_KEY, 1)
-                                .putString(LAST_STREAK_DATE_KEY, lastCompletionDate)
-                                .apply();
-                        return 1;
-                    } else {
-                        userPrefs.edit()
-                                .putInt(STREAK_COUNT_KEY, 0)
-                                .putString(LAST_STREAK_DATE_KEY, lastCompletionDate)
-                                .apply();
-                        return 0;
-                    }
+                    currentStreak = 0;
                 }
+
+                userPrefs.edit()
+                        .putInt(STREAK_COUNT_KEY, currentStreak)
+                        .putString(LAST_STREAK_DATE_KEY, today)
+                        .apply();
+                return currentStreak;
             } else {
                 userPrefs.edit()
                         .putInt(STREAK_COUNT_KEY, 0)
@@ -186,6 +151,7 @@ public class Badge extends AppCompatActivity {
                         .apply();
                 return 0;
             }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -51,6 +51,14 @@ public class CategoryActivity extends AppCompatActivity {
         loadActivitiesByCategory(categoryName);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String categoryName = getIntent().getStringExtra("category_name");
+        loadActivitiesByCategory(categoryName);
+    }
+
+
     private void loadActivitiesByCategory(String category) {
         //load database in background
         AsyncTask.execute(() -> {

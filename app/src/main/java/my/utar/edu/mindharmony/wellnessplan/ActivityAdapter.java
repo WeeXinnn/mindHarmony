@@ -47,9 +47,9 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.Activi
         boolean isCompleted = hasCompletedToday(context, activity.getName());
 
         if (isCompleted) {
-            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.green));
+            holder.container.setBackgroundColor(ContextCompat.getColor(context, R.color.pink));
         } else {
-            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+            holder.container.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
         }
 
         holder.itemView.setOnClickListener(v -> {
@@ -67,17 +67,19 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.Activi
 
     static class ActivityViewHolder extends RecyclerView.ViewHolder {
         TextView title;
-
+        View container;
         public ActivityViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.activityTitle);
+            container = itemView.findViewById(R.id.activityContainer);
         }
     }
 
     private boolean hasCompletedToday(Context context, String activityName) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String key = activityName + "_date";
+        String key = "last_completed_date_" + activityName.replaceAll("\\s+", "_").toLowerCase();
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         return today.equals(prefs.getString(key, ""));
     }
+
 }

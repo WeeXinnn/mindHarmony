@@ -82,6 +82,12 @@ public class ViewPlan extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadDailyPlan();
+    }
+
     private void loadDailyPlan() {
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         SharedPreferences wellnessPrefs = getSharedPreferences(WELLNESS_PREFS, MODE_PRIVATE);
