@@ -32,7 +32,6 @@ public class plan extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_plan, container, false);
 
-        // Initialize views
         CardView cardMood = view.findViewById(R.id.card_mood);
         CardView cardConnect = view.findViewById(R.id.card_connect);
         CardView cardUnplug = view.findViewById(R.id.card_unplug);
@@ -43,7 +42,6 @@ public class plan extends Fragment {
         TextView activitiesCompletion = view.findViewById(R.id.activities_completion);
         TextView totalPoints = view.findViewById(R.id.total_points);
 
-        // Setup onClick listeners
         createPlanBtn.setOnClickListener(v -> startActivity(new Intent(getActivity(), Questionnaire.class)));
         viewplan.setOnClickListener(v -> startActivity(new Intent(getActivity(), ViewPlan.class)));
         badgeBtn.setOnClickListener(v -> startActivity(new Intent(getActivity(), Badge.class)));
@@ -52,7 +50,6 @@ public class plan extends Fragment {
         cardUnplug.setOnClickListener(v -> openCategory("Unplug & Reset"));
         cardVibe.setOnClickListener(v -> openCategory("Boost Your Vibe"));
 
-        // Update UI
         updateUI(activitiesCompletion, totalPoints);
 
         return view;
@@ -61,7 +58,6 @@ public class plan extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Update UI when returning to the fragment
         updateUI(getView().findViewById(R.id.activities_completion), getView().findViewById(R.id.total_points));
     }
 
@@ -69,18 +65,15 @@ public class plan extends Fragment {
         SharedPreferences userPrefs = getActivity().getSharedPreferences(USER_PREFS, getActivity().MODE_PRIVATE);
         SharedPreferences wellnessPrefs = getActivity().getSharedPreferences(WELLNESS_PREFS, getActivity().MODE_PRIVATE);
 
-        // Get the current date and the last completion date
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         String dailyCompletionDate = userPrefs.getString(DAILY_COMPLETION_DATE_KEY, "");
         int dailyCompletionCount = userPrefs.getInt(DAILY_COMPLETION_COUNT_KEY, 0);
         String time = wellnessPrefs.getString("time", "15 minutes");
         int activitiesPerDay = getActivitiesPerDay(time);
 
-        // Calculate completed activities for today
         int completedToday = today.equals(dailyCompletionDate) ? dailyCompletionCount : 0;
         activitiesCompletion.setText(completedToday + "/" + activitiesPerDay);
 
-        // Update total points
         int points = userPrefs.getInt("points", 0);
         totalPoints.setText(String.valueOf(points));
     }

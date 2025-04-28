@@ -18,7 +18,6 @@ import my.utar.edu.mindharmony.models.Activity;
 
 public class CategoryActivity extends AppCompatActivity {
     private static final String TAG = "CategoryActivity";
-    public static final String CATEGORY_KEY = "category_name";
     private ActivityAdapter adapter;
 
     @Override
@@ -60,7 +59,6 @@ public class CategoryActivity extends AppCompatActivity {
 
 
     private void loadActivitiesByCategory(String category) {
-        //load database in background
         AsyncTask.execute(() -> {
             AppDatabase db = AppDatabase.getInstance(getApplicationContext());
             ActivityDao activityDao = db.activityDao();

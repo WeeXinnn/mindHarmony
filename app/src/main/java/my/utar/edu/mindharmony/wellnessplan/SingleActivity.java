@@ -49,7 +49,6 @@ public class SingleActivity extends AppCompatActivity {
         activityNameText.setText(activityName);
         activityDescText.setText(desc);
 
-        // Disable button if already completed today
         if (hasCompletedToday(activityName)) {
             completeBtn.setEnabled(false);
             completeBtn.setText("Completed");

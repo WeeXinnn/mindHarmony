@@ -33,12 +33,14 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.Activi
     @NonNull
     @Override
     public ActivityViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // display the activity list
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_activity, parent, false);
         return new ActivityViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ActivityViewHolder holder, int position) {
+        //bind the activity list to the view
         Activity activity = activityList.get(position);
         Context context = holder.itemView.getContext();
 

@@ -60,7 +60,6 @@ public class Badge extends AppCompatActivity {
         editor.putBoolean("badge3_unlocked", badge3Unlocked);
         editor.apply();
 
-        // Update badge count
         int unlockedCount = (badge1Unlocked ? 1 : 0) + (badge2Unlocked ? 1 : 0) + (badge3Unlocked ? 1 : 0);
         badgeNumber.setText(String.valueOf(unlockedCount));
 
@@ -107,17 +106,14 @@ public class Badge extends AppCompatActivity {
         int activitiesPerDay = getActivitiesPerDay(time);
 
         try {
-            // If no previous completion data, streak is 0
             if (lastCompletionDate.isEmpty()) {
                 return 0;
             }
 
-            // Parse dates
             Date lastDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(lastCompletionDate);
             Date todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(today);
             long diffDays = (todayDate.getTime() - lastDate.getTime()) / (24 * 60 * 60 * 1000);
 
-            // If last completion was today or yesterday, check streak
             if (diffDays == 0 || diffDays == 1) {
                 boolean completedAll = dailyCompletionCount >= activitiesPerDay;
 

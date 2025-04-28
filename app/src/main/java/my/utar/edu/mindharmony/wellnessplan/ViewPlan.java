@@ -93,7 +93,6 @@ public class ViewPlan extends AppCompatActivity {
         SharedPreferences wellnessPrefs = getSharedPreferences(WELLNESS_PREFS, MODE_PRIVATE);
         String lastPlanDate = wellnessPrefs.getString(LAST_PLAN_DATE_KEY, "");
 
-        // Check if it's the same day and questionnaire hasn't changed
         if (today.equals(lastPlanDate) && !hasQuestionnaireChanged()) {
             AsyncTask.execute(() -> {
                 List<Activity> currentPlan = loadCurrentPlan();
@@ -136,13 +135,11 @@ public class ViewPlan extends AppCompatActivity {
 
         int activitiesPerDay = getActivitiesPerDay(time);
 
-        // Convert interests to a list
         List<String> interests = new ArrayList<>();
         if (!interestsStr.isEmpty()) {
             Collections.addAll(interests, interestsStr.split(","));
         }
 
-        // Map interests to categories
         List<String> categories = new ArrayList<>();
         for (String interest : interests) {
             switch (interest) {
@@ -170,28 +167,22 @@ public class ViewPlan extends AppCompatActivity {
             categories.add("Unplug & Reset");
         }
 
-        // Load activities asynchronously
         AsyncTask.execute(() -> {
             AppDatabase db = AppDatabase.getInstance(getApplicationContext());
             ActivityDao activityDao = db.activityDao();
             List<Activity> allActivities = new ArrayList<>();
 
-            // Get activities for the mapped categories
             for (String category : categories) {
                 List<Activity> categoryActivities = activityDao.getActivitiesByCategory(category);
                 allActivities.addAll(categoryActivities);
             }
 
-            // Filter activities based on stressor, time, and mood
             List<Activity> filteredActivities = filterActivities(allActivities, stressor, time, mood, activitiesPerDay);
 
-            // Exclude recently used activities
             List<Activity> availableActivities = excludeRecentActivities(filteredActivities);
 
-            // Select random activities
             List<Activity> dailyPlan = selectRandomActivities(availableActivities, activitiesPerDay);
 
-            // Save the new plan and recent activities
             saveCurrentPlan(dailyPlan);
             saveRecentActivities(dailyPlan);
 
@@ -259,7 +250,6 @@ public class ViewPlan extends AppCompatActivity {
     }
 
     private List<Activity> excludeRecentActivities(List<Activity> activities) {
-        //avoid duplicate activities in the last 7 days
         SharedPreferences prefs = getSharedPreferences(WELLNESS_PREFS, MODE_PRIVATE);
         String recentJson = prefs.getString(RECENT_ACTIVITIES_KEY, "[]");
         List<String> recentActivityNames = new ArrayList<>();
@@ -269,7 +259,6 @@ public class ViewPlan extends AppCompatActivity {
             JSONArray recentArray = new JSONArray(recentJson);
             JSONArray updatedArray = new JSONArray();
 
-            // Filter out entries older than 7 days
             for (int i = 0; i < recentArray.length(); i++) {
                 JSONObject entry = recentArray.getJSONObject(i);
                 String date = entry.getString("date");
@@ -281,7 +270,6 @@ public class ViewPlan extends AppCompatActivity {
                 }
             }
 
-            // Update SharedPreferences
             SharedPreferences.Editor editor = prefs.edit();
             editor.putString(RECENT_ACTIVITIES_KEY, updatedArray.toString());
             editor.apply();
@@ -289,7 +277,6 @@ public class ViewPlan extends AppCompatActivity {
             throw new RuntimeException(e);
         }
 
-        // Exclude recent activities
         List<Activity> available = new ArrayList<>();
         for (Activity activity : activities) {
             if (!recentActivityNames.contains(activity.getName())) {
@@ -297,7 +284,6 @@ public class ViewPlan extends AppCompatActivity {
             }
         }
 
-        // Fallback: Use original list if none available
         if (available.isEmpty()) {
             available.addAll(activities);
         }
@@ -313,7 +299,6 @@ public class ViewPlan extends AppCompatActivity {
         try {
             JSONArray recentArray = new JSONArray(recentJson);
 
-            // Add new activities
             for (Activity activity : activities) {
                 JSONObject entry = new JSONObject();
                 entry.put("name", activity.getName());
@@ -321,7 +306,6 @@ public class ViewPlan extends AppCompatActivity {
                 recentArray.put(entry);
             }
 
-            // Save updated history
             SharedPreferences.Editor editor = prefs.edit();
             editor.putString(RECENT_ACTIVITIES_KEY, recentArray.toString());
             editor.apply();
@@ -362,14 +346,12 @@ public class ViewPlan extends AppCompatActivity {
                 return plan;
             }
 
-            // Get activity names from JSON
             List<String> activityNames = new ArrayList<>();
             for (int i = 0; i < planArray.length(); i++) {
                 JSONObject entry = planArray.getJSONObject(i);
                 activityNames.add(entry.getString("name"));
             }
 
-            // Query database for all activities and match names
             AppDatabase db = AppDatabase.getInstance(getApplicationContext());
             ActivityDao activityDao = db.activityDao();
             List<Activity> allActivities = activityDao.getActivitiesByCategory("Boost Your Vibe");
@@ -405,7 +387,6 @@ public class ViewPlan extends AppCompatActivity {
             }
         }
 
-        // Save daily completion count
         prefs.edit()
                 .putInt(DAILY_COMPLETION_COUNT_KEY, count)
                 .putString(DAILY_COMPLETION_DATE_KEY, today)
@@ -421,7 +402,6 @@ public class ViewPlan extends AppCompatActivity {
         int currentStreak = prefs.getInt(STREAK_COUNT_KEY, 0);
 
         try {
-            // If no previous streak data
             if (lastStreakDate.isEmpty()) {
                 if (todayCompletedCount == activitiesPerDay) {
                     prefs.edit()
@@ -433,53 +413,26 @@ public class ViewPlan extends AppCompatActivity {
                 return 0;
             }
 
-            // Parse dates
             Date lastDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(lastStreakDate);
             Date todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(today);
             long diffDays = (todayDate.getTime() - lastDate.getTime()) / (24 * 60 * 60 * 1000);
 
             if (diffDays == 1) {
-                // Consecutive day
-                if (todayCompletedCount == activitiesPerDay) {
-                    currentStreak++;
-                    prefs.edit()
-                            .putInt(STREAK_COUNT_KEY, currentStreak)
-                            .putString(LAST_STREAK_DATE_KEY, today)
-                            .apply();
-                    return currentStreak;
-                } else {
-                    prefs.edit()
-                            .putInt(STREAK_COUNT_KEY, 0)
-                            .putString(LAST_STREAK_DATE_KEY, today)
-                            .apply();
-                    return 0;
-                }
+                currentStreak = (todayCompletedCount == activitiesPerDay) ? currentStreak + 1 : 0;
             } else if (diffDays > 1) {
-                // Missed a day
-                if (todayCompletedCount == activitiesPerDay) {
-                    prefs.edit()
-                            .putInt(STREAK_COUNT_KEY, 1)
-                            .putString(LAST_STREAK_DATE_KEY, today)
-                            .apply();
-                    return 1;
-                } else {
-                    prefs.edit()
-                            .putInt(STREAK_COUNT_KEY, 0)
-                            .putString(LAST_STREAK_DATE_KEY, today)
-                            .apply();
-                    return 0;
-                }
+                currentStreak = (todayCompletedCount == activitiesPerDay) ? 1 : 0;
             } else {
-                // Same day
                 if (todayCompletedCount == activitiesPerDay && currentStreak == 0) {
-                    prefs.edit()
-                            .putInt(STREAK_COUNT_KEY, 1)
-                            .putString(LAST_STREAK_DATE_KEY, today)
-                            .apply();
-                    return 1;
+                    currentStreak = 1;
                 }
-                return currentStreak;
             }
+
+            prefs.edit()
+                    .putInt(STREAK_COUNT_KEY, currentStreak)
+                    .putString(LAST_STREAK_DATE_KEY, today)
+                    .apply();
+
+            return currentStreak;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -490,13 +443,11 @@ public class ViewPlan extends AppCompatActivity {
         List<Activity> copy = new ArrayList<>(activities);
         Random random = new Random();
 
-        // Select up to 'count' random activities
         for (int i = 0; i < Math.min(count, copy.size()); i++) {
             int index = random.nextInt(copy.size());
             selected.add(copy.remove(index));
         }
 
-        // Fallback if not enough activities
         if (selected.size() < count && !activities.isEmpty()) {
             selected.addAll(activities.subList(0, Math.min(count - selected.size(), activities.size())));
         }
