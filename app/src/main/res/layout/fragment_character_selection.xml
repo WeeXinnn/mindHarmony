@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="12dp"
+    tools:context=".aichatbot.CharacterSelectionFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="20dp"
+            android:text="👋 Hi, User"
+            android:textAlignment="textStart"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#000000" />
+
+        <TextView
+            android:id="@+id/subTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="20dp"
+            android:text="How can I help you today?"
+            android:textAlignment="textStart"
+            android:textSize="14sp"
+            android:textColor="#434344" />
+
+        <LinearLayout
+            android:id="@+id/characterSelectionContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/leftArrowButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Previous character"
+                android:scaleType="fitCenter"
+                android:padding="4dp"
+                android:src="@drawable/left" />
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                android:layout_weight="1">
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/characterAnimation"
+                    android:layout_width="280dp"
+                    android:layout_height="270dp"
+                    android:layout_gravity="center"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    app:lottie_rawRes="@raw/dog1" />
+            </FrameLayout>
+
+            <ImageButton
+                android:id="@+id/rightArrowButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Next character"
+                android:scaleType="fitCenter"
+                android:padding="4dp"
+                android:src="@drawable/right" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/characterNameText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Buddy"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#7E3A20" />
+
+        <TextView
+            android:id="@+id/descriptionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="20dp"
+            android:text="Your friendly emotional support companion"
+            android:textAlignment="center"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/letsChatButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:text="Let's Chat"
+            android:textSize="16sp"
+            android:padding="10dp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#4CAF50"
+            android:textStyle="bold" />
+    </LinearLayout>
+</FrameLayout>
