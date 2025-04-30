@@ -8,7 +8,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.HashMap;
 import java.util.Map;
 
-import my.utar.edu.mindharmony.aichatbot.chatbot;
+import my.utar.edu.mindharmony.aichatbot.CharacterSelectionFragment;
 import my.utar.edu.mindharmony.meditation.meditation;
 import my.utar.edu.mindharmony.profile.profile;
 import my.utar.edu.mindharmony.userwellbeingtracking.userwellbeingtracking;
@@ -25,11 +25,11 @@ public class MainActivity extends AppCompatActivity {
         navBar = findViewById(R.id.bottom_navigation);
 
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new chatbot())
+                .replace(R.id.fragment_container, new CharacterSelectionFragment())
                 .commit();
 
         Map<Integer, Fragment> fragmentMap = new HashMap<>();
-        fragmentMap.put(R.id.nav_home, new chatbot());
+        fragmentMap.put(R.id.nav_home, new CharacterSelectionFragment());
         fragmentMap.put(R.id.nav_meditation, new meditation());
         fragmentMap.put(R.id.nav_plan, new plan());
         fragmentMap.put(R.id.nav_mood, new userwellbeingtracking());
