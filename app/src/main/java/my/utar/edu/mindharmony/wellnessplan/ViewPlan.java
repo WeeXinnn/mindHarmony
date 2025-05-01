@@ -1,5 +1,9 @@
 package my.utar.edu.mindharmony.wellnessplan;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +20,7 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -26,6 +31,7 @@ import my.utar.edu.mindharmony.R;
 import my.utar.edu.mindharmony.database.AppDatabase;
 import my.utar.edu.mindharmony.dao.ActivityDao;
 import my.utar.edu.mindharmony.models.Activity;
+import my.utar.edu.mindharmony.notification.NotificationReceiver;
 
 public class ViewPlan extends AppCompatActivity {
     private static final String WELLNESS_PREFS = "UserWellnessPlan";
@@ -66,6 +72,7 @@ public class ViewPlan extends AppCompatActivity {
         adapter = new ActivityAdapter();
         recyclerView.setAdapter(adapter);
 
+        setupDailyNotification();
         loadDailyPlan();
     }
 
@@ -86,6 +93,30 @@ public class ViewPlan extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadDailyPlan();
+    }
+
+    private void setupDailyNotification() {
+        SharedPreferences userPrefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String currentPlan = userPrefs.getString("current_plan", "");
+        boolean notificationsEnabled = userPrefs.getBoolean("notifications_enabled", true);
+
+        if (!currentPlan.isEmpty() && notificationsEnabled) {
+            Intent intent = new Intent(this, NotificationReceiver.class);
+            intent.putExtra("title", "Daily Reminder");
+            intent.putExtra("message", "Check your wellness plan for today!");
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, 8);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+
+            if (alarmManager != null) {
+            }
+        }
     }
 
     private void loadDailyPlan() {

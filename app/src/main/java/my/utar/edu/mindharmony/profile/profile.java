@@ -1,8 +1,11 @@
 package my.utar.edu.mindharmony.profile;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,13 +15,14 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import my.utar.edu.mindharmony.R;
 
 public class profile extends Fragment {
@@ -33,6 +37,7 @@ public class profile extends Fragment {
     private TextView privacyPolicyText;
 
     private SharedPreferences sharedPreferences;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
 
     public profile() {
 
@@ -62,6 +67,18 @@ public class profile extends Fragment {
         String savedName = sharedPreferences.getString(KEY_USERNAME, "User12345678");
         nameText.setText(savedName);
 
+        requestPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        Toast.makeText(requireContext(), "Notification permission granted", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireContext(), "Notification permission denied", Toast.LENGTH_SHORT).show();
+                        notificationSwitch.setChecked(false); // Reset the switch if permission is denied
+                    }
+                }
+        );
+
         boolean notificationEnabled = sharedPreferences.getBoolean(KEY_NOTIFICATION, false);
         notificationSwitch.setChecked(notificationEnabled);
 
@@ -87,6 +104,9 @@ public class profile extends Fragment {
         });
 
         notificationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                checkAndRequestNotificationPermission();
+            }
             saveNotificationSetting(isChecked);
             Toast.makeText(requireContext(), "Notification setting updated", Toast.LENGTH_SHORT).show();
         });
@@ -106,6 +126,15 @@ public class profile extends Fragment {
             builder.create().show();
         });
         return view;
+    }
+
+    private void checkAndRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
     }
 
     private String loadPrivacyPolicy() {
