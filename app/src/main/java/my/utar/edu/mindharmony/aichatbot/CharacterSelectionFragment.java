@@ -31,15 +31,15 @@ public class CharacterSelectionFragment extends Fragment {
     };
 
     private final String[] characterNames = {
-            "Buddy",
             "Max",
-            "Charlie"
+            "Luna",
+            "Buddy"
     };
 
     private final String[] characterDescriptions = {
-            "Your friendly emotional support companion",
-            "A playful buddy to brighten your day",
-            "A loyal friend who's always there for you"
+            "Energetic, motivating, and always ready to take on a challenge. Max is your go-to buddy for getting things done and staying focused.",
+            "Calm, supportive, and a great listener. Luna helps you slow down, reflect, and feel understood.",
+            "Playful, funny, and full of good vibes. Buddy brings jokes, emojis, and a smile to every chat."
     };
 
     private int currentCharacterIndex = 0;
@@ -86,6 +86,10 @@ public class CharacterSelectionFragment extends Fragment {
         letsChatButton.setOnClickListener(v -> {
             // Save the selected character resource ID to use in the chatbot
             ChatbotPreferences.saveSelectedCharacter(requireContext(), characterAnimations[currentCharacterIndex]);
+
+            // Save the character name and description
+            ChatbotPreferences.saveCharacterName(requireContext(), characterNames[currentCharacterIndex]);
+            ChatbotPreferences.saveCharacterDescription(requireContext(), characterDescriptions[currentCharacterIndex]);
 
             // Navigate to chatbot fragment
             chatbot chatbotFragment = new chatbot();
