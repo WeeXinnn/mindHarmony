@@ -2,6 +2,8 @@ package my.utar.edu.mindharmony.aichatbot;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
@@ -14,12 +16,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -31,7 +35,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
-import java.util.HashSet;
 
 import com.airbnb.lottie.LottieAnimationView;
 import my.utar.edu.mindharmony.BuildConfig;
@@ -48,28 +51,54 @@ import okhttp3.Response;
 public class chatbot extends Fragment {
 
     private static final int REQUEST_CODE_SPEECH_INPUT = 100;
-    private static final String TAG = "SoftTTS_Chatbot";
+    private static final String TAG = "Chatbot";
     private EditText questionInput;
-    private Button sendButton;
+    private ImageButton sendButton;
     private ImageButton voiceInputButton;
+    private ImageButton keyboardButton;
+    private ImageButton photoButton;
+    private ImageButton photoButtonAlt;
+    private ImageButton micButtonAlt;
     private TextView responseView;
     private ImageView speakerToggleButton;
     private LottieAnimationView lottie;
+    private LinearLayout iconInputLayout;
+    private LinearLayout textInputLayout;
     private OkHttpClient client = new OkHttpClient();
 
     private TextToSpeech textToSpeech;
     private boolean isSpeechMuted = false;
     private static final String API_KEY = BuildConfig.GEMINI_API_KEY;
 
-    // Default character animation resource
     private int characterAnimationResource = R.raw.dog1;
+    private String characterName = "Max";
+    private String characterDescription = "Energetic, motivating, and always ready to take on a challenge.";
 
-    // System prompt
-    private static final String SYSTEM_PROMPT =
-            "You are an AI-powered emotional support chatbot designed to provide users with compassionate, " +
-                    "non-judgmental support through text and voice interactions. Your responses should be warm, " +
-                    "empathetic, and conversational in tone. Use simple language and short sentences when possible. " +
-                    "Provide gentle encouragement and validate the user's feelings.";
+    // Base system prompt template
+    private static final String BASE_SYSTEM_PROMPT =
+            "You are an AI-powered emotional support chatbot named %s designed to provide users with compassionate, " +
+                    "non-judgmental support through text and voice interactions. Your personality is: %s " +
+                    "Your responses should be warm, empathetic, and conversational in tone. Use simple language and short sentences when possible. " +
+                    "Provide gentle encouragement and validate the user's feelings. When appropriate, provide helpful and timely suggestions. Avoid using emojis or special characters like asterisks in your responses.";
+
+    // The actual system prompt will be set in onCreate after getting character info
+    private String SYSTEM_PROMPT;
+    private LinearLayout emergencyButtonsContainer;
+
+
+    // Crisis detection constants
+    private static final String[] CRISIS_KEYWORDS = {
+            "suicide", "kill myself", "end my life", "want to die", "can't go on",
+            "don't want to live", "self harm", "cutting myself", "overdose",
+            "jump off", "hang myself", "shoot myself", "no reason to live"
+    };
+
+    private static final String CRISIS_RESPONSE =
+            "I'm really concerned about what you're going through. Please know you're not alone and there are people who care and want to help.\n"+
+            "Would you like to connect with the support resources below, or would you prefer to keep talking with me and share more about what's on your mind?";
+
+    private static final String CRISIS_FOLLOWUP =
+            "Your safety is important. I strongly encourage you to reach out to the suicide and crisis lifeline.";
 
     public chatbot() {
         // Required empty constructor
@@ -80,43 +109,59 @@ public class chatbot extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chatbot, container, false);
 
+        // Initialize views
         questionInput = view.findViewById(R.id.questionInput);
         sendButton = view.findViewById(R.id.sendButton);
         voiceInputButton = view.findViewById(R.id.voiceInputButton);
+        keyboardButton = view.findViewById(R.id.keyboardButton);
+        photoButton = view.findViewById(R.id.photoButton);
+        photoButtonAlt = view.findViewById(R.id.photoButtonAlt);
+        micButtonAlt = view.findViewById(R.id.micButtonAlt);
         responseView = view.findViewById(R.id.responseView);
         speakerToggleButton = view.findViewById(R.id.speakerToggleButton);
         lottie = view.findViewById(R.id.lottie);
-
+        iconInputLayout = view.findViewById(R.id.iconInputLayout);
+        textInputLayout = view.findViewById(R.id.textInputLayout);
+        emergencyButtonsContainer = view.findViewById(R.id.emergencyButtonsContainer);
         // Get selected character animation
         characterAnimationResource = ChatbotPreferences.getSelectedCharacter(requireContext(), R.raw.dog1);
+
+        // Get character name and description from preferences
+        characterName = ChatbotPreferences.getCharacterName(requireContext(), "Max");
+        characterDescription = ChatbotPreferences.getCharacterDescription(
+                requireContext(),
+                "Energetic, motivating, and always ready to take on a challenge.");
+
+        // Set the personalized system prompt
+        SYSTEM_PROMPT = String.format(BASE_SYSTEM_PROMPT, characterName, characterDescription);
+
+        Log.d(TAG, "Using character: " + characterName + " with description: " + characterDescription);
+        Log.d(TAG, "System prompt: " + SYSTEM_PROMPT);
 
         // Set up Lottie animation with selected character
         setupLottieAnimation();
 
-        // Initialize TextToSpeech with improved settings
+        // Initialize TextToSpeech with natural voice settings
         initializeTextToSpeech();
 
         // Set up speaker toggle button
         setupSpeakerToggleButton();
 
-        sendButton.setOnClickListener(v -> {
-            String userInput = questionInput.getText().toString();
-            if (!userInput.isEmpty()) {
-                sendQuestionToGemini(userInput);
-                questionInput.setText("");
-            }
-        });
+        // Set up input mode toggle
+        setupInputModeToggle();
 
-        voiceInputButton.setOnClickListener(v -> startVoiceRecognition());
+        // Set up response text view
+        setupResponseView();
+
+        // Set up click listeners for buttons
+        setupButtonListeners();
 
         ImageView backButton = view.findViewById(R.id.backButton);
         backButton.setOnClickListener(v -> {
-            // Navigate back using Navigation Component
             try {
                 NavController navController = Navigation.findNavController(view);
                 navController.navigateUp();
             } catch (Exception e) {
-                // Fallback if Navigation Component fails
                 handleBackButtonFallback();
             }
         });
@@ -124,40 +169,71 @@ public class chatbot extends Fragment {
         return view;
     }
 
-    // Helper method for fallback handling
+    private void setupResponseView() {
+        responseView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            // Layout change handling if needed
+        });
+    }
+
+    private void setupInputModeToggle() {
+        iconInputLayout.setVisibility(View.VISIBLE);
+        textInputLayout.setVisibility(View.GONE);
+
+        keyboardButton.setOnClickListener(v -> {
+            iconInputLayout.setVisibility(View.GONE);
+            textInputLayout.setVisibility(View.VISIBLE);
+            questionInput.requestFocus();
+        });
+
+        micButtonAlt.setOnClickListener(v -> {
+            startVoiceRecognition();
+        });
+    }
+
+    private void setupButtonListeners() {
+        sendButton.setOnClickListener(v -> {
+            String userInput = questionInput.getText().toString();
+            if (!userInput.isEmpty()) {
+                sendQuestionToGemini(userInput);
+                questionInput.setText("");
+                textInputLayout.setVisibility(View.GONE);
+                iconInputLayout.setVisibility(View.VISIBLE);
+            }
+        });
+
+        voiceInputButton.setOnClickListener(v -> startVoiceRecognition());
+
+        photoButton.setOnClickListener(v -> {
+            showToast("Photo input functionality not implemented yet");
+        });
+
+        photoButtonAlt.setOnClickListener(v -> {
+            showToast("Photo input functionality not implemented yet");
+        });
+    }
+
     private void handleBackButtonFallback() {
         if (getActivity() != null) {
             if (getParentFragmentManager().getBackStackEntryCount() > 0) {
-                // If there are fragments in the back stack, pop one
                 getParentFragmentManager().popBackStack();
             } else {
-                // If no fragments in back stack but this isn't the main screen,
-                // navigate to main activity or home screen
                 try {
                     Intent intent = new Intent(getActivity(), MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                 } catch (Exception e) {
-                    // Last resort: let the system handle the back press
                     getActivity().onBackPressed();
                 }
             }
         }
     }
 
-
-
     private void setupLottieAnimation() {
         if (lottie != null) {
-            // Set the selected character animation
             lottie.setAnimation(characterAnimationResource);
-            // Make sure it's visible
             lottie.setVisibility(View.VISIBLE);
-            // Start animation
             lottie.animate();
-            // Set animation to loop continuously
             lottie.loop(true);
-            // Start playing animation
             lottie.playAnimation();
         }
     }
@@ -167,29 +243,21 @@ public class chatbot extends Fragment {
             if (status == TextToSpeech.SUCCESS) {
                 int result = textToSpeech.setLanguage(Locale.ENGLISH);
 
-                // Apply softer base settings
-                textToSpeech.setSpeechRate(0.70f);  // Much slower for clearer speech
-                textToSpeech.setPitch(0.88f);       // Lower pitch for softer sound
+                // Set natural speaking parameters
+                textToSpeech.setSpeechRate(0.85f);  // Normal speaking rate
+                textToSpeech.setPitch(1.0f);      // Normal pitch
+
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    Voice voice = findSofterVoice();
+                    Voice voice = findNaturalFemaleVoice();
                     if (voice != null) {
                         textToSpeech.setVoice(voice);
                         Log.d(TAG, "Using voice: " + voice.getName());
                     }
-
-                    // Apply audio enhancements
-                    applySofterAudioSettings();
                 }
-
-                // Try specific engine configurations
-                configureTTSEngine();
 
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     showToast("Language not supported. Please install language data.");
-                } else {
-                    // Log available voices for debugging
-                    logAvailableVoices();
                 }
             } else {
                 showToast("Text-to-speech initialization failed");
@@ -197,161 +265,49 @@ public class chatbot extends Fragment {
         });
     }
 
-    private void logAvailableVoices() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && textToSpeech != null) {
-            Set<Voice> voices = textToSpeech.getVoices();
-            Log.d(TAG, "Available TTS voices: " + voices.size());
-            for (Voice voice : voices) {
-                if (voice.getLocale().getLanguage().equals(Locale.ENGLISH.getLanguage())) {
-                    Log.d(TAG, "Voice: " + voice.getName() +
-                            ", Locale: " + voice.getLocale() +
-                            ", Quality: " + voice.getQuality());
-                }
-            }
-        }
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private Voice findSofterVoice() {
-        // Prioritize voices that tend to sound softer and more natural
-        String[] preferredVoicePatterns = {
-                "female",    // Female voices often sound softer
-                "wavenet",   // Google's neural voices
-                "neural",    // Neural network-based voices
-                "premium",   // Higher quality voices
-                "enhanced",  // Enhanced quality voices
-                "natural"    // Natural sounding voices
-        };
-
-        Voice bestVoice = null;
-        int highestScore = -1;
-
+    private Voice findNaturalFemaleVoice() {
         Set<Voice> voices = textToSpeech.getVoices();
         if (voices == null) {
             return textToSpeech.getDefaultVoice();
         }
 
+        // First try to find a high-quality female voice
         for (Voice voice : voices) {
-            // Skip non-English voices
-            if (!voice.getLocale().getLanguage().equals(Locale.ENGLISH.getLanguage())) {
-                continue;
-            }
-
-            String voiceName = voice.getName().toLowerCase();
-            int score = 0;
-
-            // Score based on preferred voice patterns
-            for (String pattern : preferredVoicePatterns) {
-                if (voiceName.contains(pattern)) {
-                    score += 5;
+            if (voice.getLocale().getLanguage().equals(Locale.ENGLISH.getLanguage())) {
+                String voiceName = voice.getName().toLowerCase();
+                if ((voiceName.contains("female") || voiceName.contains("woman")) &&
+                        voice.getQuality() >= Voice.QUALITY_HIGH) {
+                    return voice;
                 }
             }
-
-            // Female voices often sound softer than male voices
-            if (voiceName.contains("female")) {
-                score += 15;
-            }
-
-            // Avoid voices with "robot" or "standard" in their names
-            if (voiceName.contains("robot") || voiceName.contains("standard")) {
-                score -= 10;
-            }
-
-            // High quality voices typically have better audio processing
-            if (voice.getQuality() == Voice.QUALITY_VERY_HIGH) {
-                score += 15;
-            } else if (voice.getQuality() == Voice.QUALITY_HIGH) {
-                score += 10;
-            }
-
-            // Prefer network voices as they tend to be higher quality
-            if (voice.isNetworkConnectionRequired()) {
-                score += 5;
-            }
-
-            if (score > highestScore) {
-                highestScore = score;
-                bestVoice = voice;
-            }
         }
 
-        if (bestVoice != null) {
-            Log.d(TAG, "Selected voice: " + bestVoice.getName() + " with score: " + highestScore);
-        }
-
-        return bestVoice != null ? bestVoice : textToSpeech.getDefaultVoice();
-    }
-
-    private void applySofterAudioSettings() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            try {
-                // Try to access any available audio enhancement features
-                Bundle params = new Bundle();
-
-                // Some TTS engines support these parameters
-                params.putFloat("volume", 0.85f);  // Slightly lower volume
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    // These are manufacturer-specific but worth trying
-                    params.putString("audio_attributes", "media");  // Optimize for media playback
-                    params.putInt("audio_quality", 100);           // Request highest quality
-                    params.putString("emotion", "calm");           // Request calm speaking style
+        // Then try any female voice
+        for (Voice voice : voices) {
+            if (voice.getLocale().getLanguage().equals(Locale.ENGLISH.getLanguage())) {
+                String voiceName = voice.getName().toLowerCase();
+                if (voiceName.contains("female") || voiceName.contains("woman")) {
+                    return voice;
                 }
-
-                // Additional settings that might help on some devices
-                textToSpeech.setAudioAttributes(new android.media.AudioAttributes.Builder()
-                        .setUsage(android.media.AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
-                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
-                        .build());
-
-                textToSpeech.speak("", TextToSpeech.QUEUE_FLUSH, params, "init_audio_params");
-            } catch (Exception e) {
-                Log.w(TAG, "Some audio parameters not supported", e);
             }
         }
-    }
 
-    private void configureTTSEngine() {
-        // Try to configure the specific TTS engine being used
-        String engineName = textToSpeech.getDefaultEngine().toLowerCase();
-        Log.d(TAG, "Using TTS engine: " + engineName);
-
-        try {
-            if (engineName.contains("google")) {
-                // Google TTS specific settings
-                textToSpeech.setPitch(0.82f);  // Even lower pitch for Google TTS
-                textToSpeech.setSpeechRate(0.65f);  // Slower for Google TTS
-                Log.d(TAG, "Applied Google TTS settings");
-            } else if (engineName.contains("samsung")) {
-                // Samsung TTS specific settings
-                textToSpeech.setPitch(0.90f);
-                textToSpeech.setSpeechRate(0.78f);
-                Log.d(TAG, "Applied Samsung TTS settings");
-            } else if (engineName.contains("amazon") || engineName.contains("polly")) {
-                // Amazon Polly if available
-                textToSpeech.setPitch(0.88f);
-                textToSpeech.setSpeechRate(0.72f);
-                Log.d(TAG, "Applied Amazon TTS settings");
-            }
-        } catch (Exception e) {
-            Log.w(TAG, "Error configuring engine-specific TTS", e);
-        }
+        // Fallback to default voice
+        return textToSpeech.getDefaultVoice();
     }
 
     private void setupSpeakerToggleButton() {
         speakerToggleButton.setImageResource(R.drawable.sound_icon);
         speakerToggleButton.setOnClickListener(v -> {
             isSpeechMuted = !isSpeechMuted;
-            // Update the speaker icon based on mute status
             if (isSpeechMuted) {
                 speakerToggleButton.setImageResource(R.drawable.mute_icon);
-                // Stop any ongoing speech
                 if (textToSpeech != null && textToSpeech.isSpeaking()) {
                     textToSpeech.stop();
                 }
             } else {
                 speakerToggleButton.setImageResource(R.drawable.sound_icon);
-                // Read the current response if available
                 String currentResponse = responseView.getText().toString();
                 if (!currentResponse.isEmpty()) {
                     speakText(currentResponse);
@@ -362,116 +318,16 @@ public class chatbot extends Fragment {
 
     private void speakText(String text) {
         if (!isSpeechMuted && textToSpeech != null) {
-            // Stop any current speech
             if (textToSpeech.isSpeaking()) {
                 textToSpeech.stop();
             }
 
-            // Process the text for softer delivery
-            String processedText = processSoftSpeech(text);
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Bundle params = new Bundle();
-
-                // Split into shorter chunks for better processing
-                String[] chunks = splitIntoSmallChunks(processedText);
-                int queueMode = TextToSpeech.QUEUE_FLUSH;
-
-                for (String chunk : chunks) {
-                    String ssmlText = "<speak>" +
-                            "<prosody rate=\"0.70\" pitch=\"0.88\" volume=\"0.9\">" +
-                            "<amazon:effect name=\"drc\">" +  // Dynamic range compression if available
-                            chunk +
-                            "</amazon:effect>" +
-                            "</prosody>" +
-                            "</speak>";
-
-                    // Remove the amazon effect tag if not using Amazon Polly
-                    if (!textToSpeech.getDefaultEngine().toLowerCase().contains("amazon")) {
-                        ssmlText = ssmlText.replace("<amazon:effect name=\"drc\">", "").replace("</amazon:effect>", "");
-                    }
-
-                    textToSpeech.speak(ssmlText, queueMode, params, "soft_speech_" + System.currentTimeMillis());
-                    queueMode = TextToSpeech.QUEUE_ADD;
-
-                    // Add a slight delay between chunks for more natural speaking
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        Log.w(TAG, "Sleep interrupted between TTS chunks", e);
-                    }
-                }
+                textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "speech_" + System.currentTimeMillis());
             } else {
-                textToSpeech.speak(processedText, TextToSpeech.QUEUE_FLUSH, null);
+                textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
             }
         }
-    }
-
-    private String processSoftSpeech(String text) {
-        // Don't modify if already contains SSML
-        if (text.contains("<speak>")) return text;
-
-        // Replace exclamation marks with periods for softer tone
-        text = text.replace("!", ".");
-
-        // Soften ALL CAPS text which can sound harsh when spoken
-        text = text.replaceAll("([A-Z]{3,})", "<prosody volume=\"soft\">$1</prosody>");
-
-        // Add soft breaks and breathing
-        text = text
-                // Add breathing pauses for more natural rhythm
-                .replace(". ", ".<break time=\"450ms\"/> ")
-                .replace("? ", "?<break time=\"500ms\"/> ")
-                .replace(", ", ",<break time=\"250ms\"/> ")
-                .replace("; ", ";<break time=\"300ms\"/> ")
-
-                // Add slight breathing sounds for longer pauses
-                .replace(".<break", ".<break strength=\"medium\"")
-
-                // Use more subtle emphasis - strong emphasis can sound harsh
-                .replaceAll("\\b(very|really|extremely)\\b", "<prosody volume=\"soft\">$1</prosody>")
-
-                // Add soft speaking style where appropriate
-                .replaceAll("(?i)(thank you|sorry|please|excuse me)", "<prosody pitch=\"low\" rate=\"0.75\">$1</prosody>")
-
-                // Add slight emphasis on important words
-                .replaceAll("\\b(important|critical|crucial|essential)\\b", "<emphasis level=\"moderate\">$1</emphasis>")
-
-                // Add breathing for long sentences
-                .replaceAll("([^.!?]{60,}?)([,;:])", "$1$2<break time=\"150ms\"/>");
-
-        return text;
-    }
-
-    // Split text into smaller chunks (20-30 words) for better TTS processing
-    private String[] splitIntoSmallChunks(String text) {
-        ArrayList<String> chunks = new ArrayList<>();
-        String[] sentences = text.split("(?<=[.!?])\\s+");
-        StringBuilder currentChunk = new StringBuilder();
-        int wordCount = 0;
-
-        for (String sentence : sentences) {
-            int sentenceWordCount = sentence.split("\\s+").length;
-
-            if (wordCount + sentenceWordCount > 25) {  // Reduced chunk size for smoother processing
-                // This chunk is getting large, save it and start a new one
-                if (currentChunk.length() > 0) {
-                    chunks.add(currentChunk.toString());
-                    currentChunk = new StringBuilder();
-                    wordCount = 0;
-                }
-            }
-
-            currentChunk.append(sentence).append(" ");
-            wordCount += sentenceWordCount;
-        }
-
-        // Add the final chunk if not empty
-        if (currentChunk.length() > 0) {
-            chunks.add(currentChunk.toString());
-        }
-
-        return chunks.toArray(new String[0]);
     }
 
     private void startVoiceRecognition() {
@@ -493,18 +349,91 @@ public class chatbot extends Fragment {
         if (requestCode == REQUEST_CODE_SPEECH_INPUT && resultCode == Activity.RESULT_OK && data != null) {
             ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             if (result != null && !result.isEmpty()) {
-                questionInput.setText(result.get(0));
-                // Auto-send the recognized speech
-                sendQuestionToGemini(result.get(0));
-                questionInput.setText("");
+                String recognizedText = result.get(0);
+                sendQuestionToGemini(recognizedText);
+                textInputLayout.setVisibility(View.VISIBLE);
+                iconInputLayout.setVisibility(View.GONE);
+                questionInput.setText(recognizedText);
+
+                questionInput.postDelayed(() -> {
+                    questionInput.setText("");
+                    textInputLayout.setVisibility(View.GONE);
+                    iconInputLayout.setVisibility(View.VISIBLE);
+                }, 2000);
             }
         }
     }
 
-    private void sendQuestionToGemini(String question) {
-        // No need to show/hide the animation as it should be always visible now
+    private void handleCrisisSituation(String userMessage) {
+        if (getActivity() == null) return;
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+        getActivity().runOnUiThread(() -> {
+            // Show crisis response
+            responseView.setText(CRISIS_RESPONSE);
+
+            // Clear any previous emergency buttons
+            emergencyButtonsContainer.removeAllViews();
+
+            // Add emergency buttons
+            addEmergencyButton(emergencyButtonsContainer, "Call Befrienders Malaysia", "tel:0376272929");
+            addEmergencyButton(emergencyButtonsContainer, "SNEHAM Malaysia", "tel:1800225757");
+
+
+            // Show the emergency buttons container
+            emergencyButtonsContainer.setVisibility(View.VISIBLE);
+
+            // Log the crisis detection
+            Log.w(TAG, "Crisis detected in user message: " + userMessage);
+
+            // Speak the crisis response if audio is enabled
+            if (!isSpeechMuted && textToSpeech != null) {
+                speakText(CRISIS_RESPONSE);
+            }
+        });
+    }
+
+    private void addEmergencyButton(LinearLayout layout, String text, String intentData) {
+        Button button = new Button(getContext());
+        button.setText(text);
+        button.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorEmergency));
+        button.setTextColor(Color.WHITE);
+        button.setPadding(16, 16, 16, 16);
+        button.setAllCaps(false);
+
+        // Make the button fill the width
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, 0, 0, 16); // Add margin to bottom
+        button.setLayoutParams(params);
+
+        button.setOnClickListener(v -> {
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(intentData));
+                startActivity(intent);
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Could not launch emergency service", Toast.LENGTH_SHORT).show();
+            }
+        });
+        layout.addView(button);
+    }
+
+    private void sendQuestionToGemini(String question) {
+        // First check for crisis keywords
+        if (containsCrisisKeywords(question)) {
+            handleCrisisSituation(question);
+            return;
+        }
+
+        // Hide emergency buttons for non-crisis messages
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                emergencyButtonsContainer.setVisibility(View.GONE);
+            });
+        }
+
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY;
         MediaType mediaType = MediaType.parse("application/json");
 
         String requestBodyJson;
@@ -524,7 +453,7 @@ public class chatbot extends Fragment {
             JSONObject modelMessage = new JSONObject();
             JSONArray modelParts = new JSONArray();
             JSONObject modelTextPart = new JSONObject();
-            modelTextPart.put("text", "I understand my role as an emotional support chatbot. I'll follow the guidelines provided.");
+            modelTextPart.put("text", "I understand my role as " + characterName + ", an emotional support chatbot. I'll follow the guidelines provided.");
             modelParts.put(modelTextPart);
             modelMessage.put("role", "model");
             modelMessage.put("parts", modelParts);
@@ -553,7 +482,6 @@ public class chatbot extends Fragment {
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     responseView.setText("Error creating request: " + e.getMessage());
-                    // We don't hide the animation anymore
                 });
             }
             return;
@@ -582,7 +510,6 @@ public class chatbot extends Fragment {
                 if (response.isSuccessful()) {
                     String responseBody = response.body().string();
                     try {
-                        // Parse the JSON response
                         JSONObject jsonResponse = new JSONObject(responseBody);
                         JSONArray candidates = jsonResponse.getJSONArray("candidates");
                         JSONObject firstCandidate = candidates.getJSONObject(0);
@@ -593,20 +520,14 @@ public class chatbot extends Fragment {
 
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(() -> {
-                                // Update the UI with the response
                                 responseView.setText(textResponse);
 
-                                // Read the response aloud if speech is not muted
                                 if (!isSpeechMuted) {
                                     speakText(textResponse);
                                 }
 
-                                // Make the animation more expressive during response
                                 if (lottie != null) {
-                                    // Speed up animation slightly to indicate "talking"
                                     lottie.setSpeed(1.2f);
-
-                                    // Return to normal speed after a delay
                                     lottie.postDelayed(() -> {
                                         if (lottie != null) {
                                             lottie.setSpeed(1.0f);
@@ -634,7 +555,16 @@ public class chatbot extends Fragment {
         });
     }
 
-    // Helper method to show toast messages
+    private boolean containsCrisisKeywords(String message) {
+        String lowerMessage = message.toLowerCase();
+        for (String keyword : CRISIS_KEYWORDS) {
+            if (lowerMessage.contains(keyword.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void showToast(String message) {
         if (getActivity() != null) {
             getActivity().runOnUiThread(() -> {
@@ -646,15 +576,11 @@ public class chatbot extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
-        // Cleanup TextToSpeech resources
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
             textToSpeech = null;
         }
-
-        // Cancel any pending API requests
         if (client != null) {
             client.dispatcher().cancelAll();
         }
@@ -663,13 +589,9 @@ public class chatbot extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-
-        // Stop any ongoing speech when the fragment is paused
         if (textToSpeech != null && textToSpeech.isSpeaking()) {
             textToSpeech.stop();
         }
-
-        // Pause the animation
         if (lottie != null) {
             lottie.pauseAnimation();
         }
@@ -678,8 +600,6 @@ public class chatbot extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        // Resume the animation
         if (lottie != null && !lottie.isAnimating()) {
             lottie.resumeAnimation();
         }

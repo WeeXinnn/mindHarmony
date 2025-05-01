@@ -20,90 +20,190 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Header with back button and speaker toggle -->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
 
-            <!-- Back Button -->
             <ImageView
                 android:id="@+id/backButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/left_arrow"
                 android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:contentDescription="Back button"
-                android:padding="12dp"
-             />
+                android:layout_centerVertical="true"
+                android:contentDescription="Back button" />
 
-            <com.airbnb.lottie.LottieAnimationView
-                android:layout_width="200dp"
-                android:layout_height="200dp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chatbot"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
                 android:layout_centerHorizontal="true"
-                app:lottie_autoPlay="true"
-                android:id="@+id/lottie"
-                app:lottie_rawRes="@raw/dog1"
-                android:elevation="5dp" />
+                android:layout_centerVertical="true" />
 
             <ImageView
                 android:id="@+id/speakerToggleButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/sound_icon"
                 android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true"
-                android:contentDescription="Toggle speech output"
-                android:padding="8dp" />
+                android:layout_centerVertical="true"
+                android:contentDescription="Speaker toggle" />
         </RelativeLayout>
 
-        <!-- Response TextView -->
-        <TextView
-            android:id="@+id/responseView"
+        <!-- Animation and Response Area -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="16sp"
-            android:padding="10dp"
-            android:background="#f0f0f0"
-            android:minHeight="100dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-        <!-- Input Row: EditText + Voice Button -->
+            <!-- Character Animation -->
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottie"
+                android:layout_width="250dp"
+                android:layout_height="230dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true" />
+
+            <!-- Scrollable Response View with integrated emergency buttons -->
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="240dp"
+                android:layout_marginBottom="16dp"
+                android:fillViewport="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/responseView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
+                        android:background="@drawable/response_background"
+                        android:elevation="2dp"
+                        android:minHeight="100dp"/>
+
+                    <!-- Emergency Buttons Container - Initially invisible -->
+                    <LinearLayout
+                        android:id="@+id/emergencyButtonsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp"
+                        android:visibility="gone"
+                        android:background="@drawable/response_background"
+                        android:elevation="2dp"
+                        android:layout_marginTop="8dp">
+
+                        <!-- Crisis buttons will be added here programmatically -->
+
+                    </LinearLayout>
+                </LinearLayout>
+            </ScrollView>
+        </FrameLayout>
+
+        <!-- Icon Input Mode -->
         <LinearLayout
+            android:id="@+id/iconInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:id="@+id/keyboardButton"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/keyboard"
+                android:background="@android:color/transparent"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="Keyboard input" />
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/voiceInputButton"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/mic"
+                    android:background="@drawable/mic_button_background"
+                    android:contentDescription="Voice input" />
+            </FrameLayout>
+
+            <ImageButton
+                android:id="@+id/photoButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/photo_icon"
+                android:background="@android:color/transparent"
+                android:layout_marginStart="16dp"
+                android:contentDescription="Photo input" />
+        </LinearLayout>
+
+        <!-- Text Input Mode -->
+        <LinearLayout
+            android:id="@+id/textInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/photoButtonAlt"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/photo_icon"
+                android:background="@android:color/transparent"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Photo input" />
 
             <EditText
                 android:id="@+id/questionInput"
                 android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_height="48dp"
-                android:hint="Type or speak your question"
-                android:inputType="text"
-                android:padding="8dp" />
+                android:hint="Type your message..."
+                android:padding="12dp"
+                android:maxLines="3"
+                android:background="@drawable/input_background"
+                android:textSize="16sp" />
 
             <ImageButton
-                android:id="@+id/voiceInputButton"
+                android:id="@+id/sendButton"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:src="@android:drawable/ic_btn_speak_now"
-                android:contentDescription="Voice Input"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/send"
+                android:background="@android:color/transparent"
                 android:layout_marginStart="8dp"
-                android:padding="8dp" />
+                android:contentDescription="Send message" />
+
+            <ImageButton
+                android:id="@+id/micButtonAlt"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/mic"
+                android:background="@android:color/transparent"
+                android:layout_marginStart="8dp"
+                android:contentDescription="Voice input" />
         </LinearLayout>
-
-        <!-- Send Button -->
-        <Button
-            android:id="@+id/sendButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Send"
-            android:minHeight="48dp"
-            android:layout_marginBottom="16dp" />
     </LinearLayout>
-
 </FrameLayout>
