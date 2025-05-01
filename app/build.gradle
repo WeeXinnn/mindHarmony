@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
 }
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
 
 android {
     namespace 'my.utar.edu.mindharmony'
@@ -13,9 +15,13 @@ android {
         versionCode 1
         versionName "1.0"
 
+        buildConfigField "String", "GEMINI_API_KEY", "\"${localProperties.getProperty('GEMINI_API_KEY', '')}\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
 
+    }
+    buildFeatures {
+        buildConfig true
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -29,7 +35,6 @@ android {
 }
 
 dependencies {
-
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
@@ -38,4 +43,9 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
     implementation "androidx.room:room-runtime:2.7.0"
     annotationProcessor "androidx.room:room-compiler:2.7.0"
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.airbnb.android:lottie:6.4.0'
+    implementation 'androidx.navigation:navigation-fragment:2.5.3'
+    implementation 'androidx.navigation:navigation-ui:2.5.3'
 }
