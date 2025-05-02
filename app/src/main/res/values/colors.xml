@@ -2,7 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="green">#A9CE85</color>
+    <color name="light_green">#A9CE85</color>
     <color name="light_yellow">#FFF7E3</color>
     <color name="grey">#E6E7F2</color>
     <color name="pink">#F7CFD8</color>
@@ -11,4 +11,5 @@
     <color name="colorPrimary">#A8DBDD</color>    <!-- Light blue color you requested -->
     <color name="colorPrimaryDark">#89C0C2</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="green">#4CAF50</color>
 </resources>
