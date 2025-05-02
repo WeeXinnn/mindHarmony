@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="latest_journal" type="id" />
+    <item name="selectedEmojiView" type="id" />
+    <item name="entryImage" type="id" />
+    <item name="entryVideo" type="id" />
+    <item name="audioLayout" type="id" />
+    <item name="audioPlayButton" type="id" />
+</resources>

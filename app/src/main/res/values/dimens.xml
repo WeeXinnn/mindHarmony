@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="streak_dot_size">35dp</dimen>
+    <dimen name="streak_dot_margin">2dp</dimen>
+    <dimen name="chart_bar_width">0.5dp</dimen>
+    <dimen name="chart_text_size">12sp</dimen>
+</resources>
