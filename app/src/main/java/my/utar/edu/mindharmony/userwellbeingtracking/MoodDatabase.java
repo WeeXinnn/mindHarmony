@@ -7,7 +7,7 @@ import androidx.room.TypeConverters;
 
 import android.content.Context;
 
-@Database(entities = {MoodEntry.class}, version = 8)
+@Database(entities = {MoodEntry.class}, version = 10)
 @TypeConverters(Converters.class)
 public abstract class MoodDatabase extends RoomDatabase {
     public abstract MoodDao moodDao();

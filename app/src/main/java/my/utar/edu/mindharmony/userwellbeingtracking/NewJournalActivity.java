@@ -67,7 +67,7 @@ public class NewJournalActivity extends AppCompatActivity {
     };
 
     private final int[] emojiValues = {5, 4, 3, 2, 1};
-
+    private static final String MALAYSIA_TIMEZONE = "Asia/Kuala_Lumpur";
     @SuppressLint({"SetTextI18n", "WrongViewCast"})
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -147,6 +147,8 @@ public class NewJournalActivity extends AppCompatActivity {
         }
 
         MoodEntry entry = new MoodEntry();
+        entry.setDate(System.currentTimeMillis()); // Store as UTC milliseconds
+        entry.setTimezone(MALAYSIA_TIMEZONE); // Force Malaysia timezone
         entry.setUserId("default");
         entry.setDate(new Date().getTime());
         entry.setRating(emojiValue);

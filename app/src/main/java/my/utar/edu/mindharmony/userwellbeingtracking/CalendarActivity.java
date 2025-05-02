@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import my.utar.edu.mindharmony.R;
 
@@ -58,10 +59,17 @@ public class CalendarActivity extends AppCompatActivity {
         }
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        currentCalendar = Calendar.getInstance();
+        currentCalendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
 
         prevMonth.setOnClickListener(v -> {
+            currentCalendar.setTimeZone(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
             currentCalendar.add(Calendar.MONTH, -1);
+            updateCalendar();
+        });
+
+        nextMonth.setOnClickListener(v -> {
+            currentCalendar.setTimeZone(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
+            currentCalendar.add(Calendar.MONTH, 1);
             updateCalendar();
         });
 
@@ -88,6 +96,7 @@ public class CalendarActivity extends AppCompatActivity {
         calendarGrid.removeAllViews();
         clearMoodCounts();
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
         monthText.setText(sdf.format(currentCalendar.getTime()));
 
         calendarGrid.setColumnCount(7);
@@ -237,10 +246,12 @@ public class CalendarActivity extends AppCompatActivity {
     private MoodEntry findMoodEntryForDay(int day) {
         Calendar targetDate = (Calendar) currentCalendar.clone();
         targetDate.set(Calendar.DAY_OF_MONTH, day);
+        targetDate.setTimeZone(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
         normalizeToStartOfDay(targetDate);
 
         for (MoodEntry entry : moodEntries) {
             Calendar entryDate = Calendar.getInstance();
+            entryDate.setTimeZone(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
             entryDate.setTimeInMillis(entry.getDate());
             normalizeToStartOfDay(entryDate);
 
@@ -254,6 +265,7 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void normalizeToStartOfDay(Calendar calendar) {
+        calendar.setTimeZone(TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);

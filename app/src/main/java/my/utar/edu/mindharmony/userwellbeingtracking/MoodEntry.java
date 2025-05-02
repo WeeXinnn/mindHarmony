@@ -14,7 +14,10 @@ public class MoodEntry {
     public String userId;
 
     @ColumnInfo(name = "date")
-    public long date; // Store date as timestamp (milliseconds since epoch)
+    public long date; // UTC timestamp in milliseconds
+
+    @ColumnInfo(name = "timezone")
+    private String timezone = "Asia/Kuala_Lumpur"; // Default to MYT
 
     @ColumnInfo(name = "rating")
     public int rating;
@@ -22,15 +25,19 @@ public class MoodEntry {
     @ColumnInfo(name = "emoji")
     public String emoji;
 
+    @Ignore
     public String emojiName;
 
-
+    @Ignore
     public int emojiRes;
 
+    @ColumnInfo(name = "note")
     public String note;
 
+    @ColumnInfo(name = "journal_text")
     public String journalText;
 
+    // Getters and setters
     public int getId() {
         return id;
     }
@@ -53,6 +60,14 @@ public class MoodEntry {
 
     public void setDate(long date) {
         this.date = date;
+    }
+
+    public String getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone != null ? timezone : "Asia/Kuala_Lumpur";
     }
 
     public int getRating() {
@@ -99,11 +114,14 @@ public class MoodEntry {
         return note;
     }
 
-
-
-
-
     public void setNote(String note) {
         this.note = note;
+    }
+
+    // Helper method to get formatted Malaysia time
+    public String getFormattedMalaysiaTime() {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy hh:mm a", java.util.Locale.getDefault());
+        sdf.setTimeZone(java.util.TimeZone.getTimeZone(timezone));
+        return sdf.format(new java.util.Date(date));
     }
 }
