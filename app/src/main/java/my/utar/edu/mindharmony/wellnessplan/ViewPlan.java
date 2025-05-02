@@ -1,6 +1,8 @@
 package my.utar.edu.mindharmony.wellnessplan;
 
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +13,7 @@ import android.util.Log;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NotificationCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -72,7 +75,6 @@ public class ViewPlan extends AppCompatActivity {
         adapter = new ActivityAdapter();
         recyclerView.setAdapter(adapter);
 
-        setupDailyNotification();
         loadDailyPlan();
     }
 
@@ -93,30 +95,6 @@ public class ViewPlan extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadDailyPlan();
-    }
-
-    private void setupDailyNotification() {
-        SharedPreferences userPrefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        String currentPlan = userPrefs.getString("current_plan", "");
-        boolean notificationsEnabled = userPrefs.getBoolean("notifications_enabled", true);
-
-        if (!currentPlan.isEmpty() && notificationsEnabled) {
-            Intent intent = new Intent(this, NotificationReceiver.class);
-            intent.putExtra("title", "Daily Reminder");
-            intent.putExtra("message", "Check your wellness plan for today!");
-
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.HOUR_OF_DAY, 8);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-
-            if (alarmManager != null) {
-            }
-        }
     }
 
     private void loadDailyPlan() {

@@ -1,10 +1,15 @@
 package my.utar.edu.mindharmony.wellnessplan;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +17,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 import my.utar.edu.mindharmony.R;
+import my.utar.edu.mindharmony.notification.NotificationReceiver;
 
 public class plan extends Fragment {
 
@@ -76,6 +83,48 @@ public class plan extends Fragment {
 
         int points = userPrefs.getInt("points", 0);
         totalPoints.setText(String.valueOf(points));
+        setupDailyNotification();
+    }
+
+    private void setupDailyNotification() {
+        Context context = requireContext();
+
+        SharedPreferences planPrefs = context.getSharedPreferences(WELLNESS_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences userPrefs = context.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
+
+        String currentPlan = planPrefs.getString("current_plan", "");
+        boolean notificationsEnabled = userPrefs.getBoolean("notifications_enabled", true);
+
+        Log.d("currentPlan", "Current Plan: " + currentPlan);
+        Log.d("notificationsEnabled", "Notifications Enabled: " + notificationsEnabled);
+
+        if (!currentPlan.isEmpty() && notificationsEnabled) {
+            Intent intent = new Intent(context, NotificationReceiver.class);
+            intent.putExtra("title", "Daily Reminder");
+            intent.putExtra("message", "Check your wellness plan for today!");
+
+            int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                pendingIntentFlags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, pendingIntentFlags);
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, 8);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+
+            if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
+            }
+
+            if (alarmManager != null) {
+                Log.d("NotificationSetup", "Notification set for: " + calendar.getTime().toString());
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            }
+        }
     }
 
     private int getActivitiesPerDay(String time) {
