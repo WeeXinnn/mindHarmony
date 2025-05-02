@@ -2,17 +2,50 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:fillAfter="true">
 
+    <!-- Initial slight shrink before growing -->
     <scale
-        android:duration="1000"
-        android:fromXScale="0.8"
-        android:fromYScale="0.8"
+        android:duration="400"
+        android:fromXScale="1.0"
+        android:fromYScale="1.0"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:toXScale="0.9"
+        android:toYScale="0.9" />
+
+    <!-- Main scale up animation with bounce effect -->
+    <scale
+        android:duration="1200"
+        android:fromXScale="0.9"
+        android:fromYScale="0.9"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:toXScale="1.1"
+        android:toYScale="1.1"
+        android:startOffset="400" />
+
+    <!-- Settle to final size -->
+    <scale
+        android:duration="600"
+        android:fromXScale="1.1"
+        android:fromYScale="1.1"
         android:pivotX="50%"
         android:pivotY="50%"
         android:toXScale="1.0"
-        android:toYScale="1.0" />
+        android:toYScale="1.0"
+        android:startOffset="1600" />
 
+    <!-- Fade in effect -->
     <alpha
-        android:duration="1200"
+        android:duration="1800"
         android:fromAlpha="0.0"
         android:toAlpha="1.0" />
+
+    <!-- Slight rotation for more visual interest -->
+    <rotate
+        android:duration="2200"
+        android:fromDegrees="-5"
+        android:toDegrees="0"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:startOffset="400" />
 </set>
