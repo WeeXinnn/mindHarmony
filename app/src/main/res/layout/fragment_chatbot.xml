@@ -194,6 +194,7 @@
                 android:src="@drawable/send"
                 android:background="@android:color/transparent"
                 android:layout_marginStart="8dp"
+                android:visibility="invisible"
                 android:contentDescription="Send message" />
 
             <ImageButton
