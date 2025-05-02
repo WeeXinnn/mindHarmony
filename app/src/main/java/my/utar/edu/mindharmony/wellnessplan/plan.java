@@ -26,10 +26,14 @@ import my.utar.edu.mindharmony.notification.NotificationReceiver;
 
 public class plan extends Fragment {
 
+    private static final String TAG = "PlanFragment";
     private static final String USER_PREFS = "UserPrefs";
     private static final String WELLNESS_PREFS = "UserWellnessPlan";
     private static final String DAILY_COMPLETION_COUNT_KEY = "daily_completion_count";
     private static final String DAILY_COMPLETION_DATE_KEY = "daily_completion_date";
+
+    private TextView activitiesCompletion;
+    private TextView totalPoints;
 
     public plan() {
         // Required empty public constructor
@@ -37,93 +41,138 @@ public class plan extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_plan, container, false);
+        try {
+            View view = inflater.inflate(R.layout.fragment_plan, container, false);
 
-        CardView cardMood = view.findViewById(R.id.card_mood);
-        CardView cardConnect = view.findViewById(R.id.card_connect);
-        CardView cardUnplug = view.findViewById(R.id.card_unplug);
-        CardView cardVibe = view.findViewById(R.id.card_vibe);
-        Button createPlanBtn = view.findViewById(R.id.btn_create_plan);
-        Button viewplan = view.findViewById(R.id.btn_view_plan);
-        Button badgeBtn = view.findViewById(R.id.btn_badge);
-        TextView activitiesCompletion = view.findViewById(R.id.activities_completion);
-        TextView totalPoints = view.findViewById(R.id.total_points);
+            activitiesCompletion = view.findViewById(R.id.activities_completion);
+            totalPoints = view.findViewById(R.id.total_points);
 
-        createPlanBtn.setOnClickListener(v -> startActivity(new Intent(getActivity(), Questionnaire.class)));
-        viewplan.setOnClickListener(v -> startActivity(new Intent(getActivity(), ViewPlan.class)));
-        badgeBtn.setOnClickListener(v -> startActivity(new Intent(getActivity(), Badge.class)));
-        cardMood.setOnClickListener(v -> openCategory("Move Your Mood"));
-        cardConnect.setOnClickListener(v -> openCategory("Connect & Chill"));
-        cardUnplug.setOnClickListener(v -> openCategory("Unplug & Reset"));
-        cardVibe.setOnClickListener(v -> openCategory("Boost Your Vibe"));
+            CardView cardMood = view.findViewById(R.id.card_mood);
+            CardView cardConnect = view.findViewById(R.id.card_connect);
+            CardView cardUnplug = view.findViewById(R.id.card_unplug);
+            CardView cardVibe = view.findViewById(R.id.card_vibe);
+            Button createPlanBtn = view.findViewById(R.id.btn_create_plan);
+            Button viewplan = view.findViewById(R.id.btn_view_plan);
+            Button badgeBtn = view.findViewById(R.id.btn_badge);
 
-        updateUI(activitiesCompletion, totalPoints);
+            if (isAdded() && getActivity() != null) {
+                createPlanBtn.setOnClickListener(v -> {
+                    if (getActivity() != null) {
+                        startActivity(new Intent(getActivity(), Questionnaire.class));
+                    }
+                });
 
-        return view;
+                viewplan.setOnClickListener(v -> {
+                    if (getActivity() != null) {
+                        startActivity(new Intent(getActivity(), ViewPlan.class));
+                    }
+                });
+
+                badgeBtn.setOnClickListener(v -> {
+                    if (getActivity() != null) {
+                        startActivity(new Intent(getActivity(), Badge.class));
+                    }
+                });
+
+                cardMood.setOnClickListener(v -> openCategory("Move Your Mood"));
+                cardConnect.setOnClickListener(v -> openCategory("Connect & Chill"));
+                cardUnplug.setOnClickListener(v -> openCategory("Unplug & Reset"));
+                cardVibe.setOnClickListener(v -> openCategory("Boost Your Vibe"));
+
+                safeUpdateUI();
+                setupDailyNotification();
+            }
+
+            return view;
+        } catch (Exception e) {
+            Log.e(TAG, "Error in onCreateView: ", e);
+            return inflater.inflate(R.layout.fragment_plan, container, false);
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        updateUI(getView().findViewById(R.id.activities_completion), getView().findViewById(R.id.total_points));
+        safeUpdateUI();
+    }
+
+    private void safeUpdateUI() {
+        try {
+            if (isAdded() && getActivity() != null && activitiesCompletion != null && totalPoints != null) {
+                updateUI(activitiesCompletion, totalPoints);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error in safeUpdateUI: ", e);
+        }
     }
 
     private void updateUI(TextView activitiesCompletion, TextView totalPoints) {
-        SharedPreferences userPrefs = getActivity().getSharedPreferences(USER_PREFS, getActivity().MODE_PRIVATE);
-        SharedPreferences wellnessPrefs = getActivity().getSharedPreferences(WELLNESS_PREFS, getActivity().MODE_PRIVATE);
+        try {
+            if (getActivity() == null) return;
 
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        String dailyCompletionDate = userPrefs.getString(DAILY_COMPLETION_DATE_KEY, "");
-        int dailyCompletionCount = userPrefs.getInt(DAILY_COMPLETION_COUNT_KEY, 0);
-        String time = wellnessPrefs.getString("time", "15 minutes");
-        int activitiesPerDay = getActivitiesPerDay(time);
+            SharedPreferences userPrefs = getActivity().getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences wellnessPrefs = getActivity().getSharedPreferences(WELLNESS_PREFS, Context.MODE_PRIVATE);
 
-        int completedToday = today.equals(dailyCompletionDate) ? dailyCompletionCount : 0;
-        activitiesCompletion.setText(completedToday + "/" + activitiesPerDay);
+            String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            String dailyCompletionDate = userPrefs.getString(DAILY_COMPLETION_DATE_KEY, "");
+            int dailyCompletionCount = userPrefs.getInt(DAILY_COMPLETION_COUNT_KEY, 0);
+            String time = wellnessPrefs.getString("time", "15 minutes");
+            int activitiesPerDay = getActivitiesPerDay(time);
 
-        int points = userPrefs.getInt("points", 0);
-        totalPoints.setText(String.valueOf(points));
-        setupDailyNotification();
+            int completedToday = today.equals(dailyCompletionDate) ? dailyCompletionCount : 0;
+            activitiesCompletion.setText(completedToday + "/" + activitiesPerDay);
+
+            int points = userPrefs.getInt("points", 0);
+            totalPoints.setText(String.valueOf(points));
+        } catch (Exception e) {
+            Log.e(TAG, "Error in updateUI: ", e);
+        }
     }
 
     private void setupDailyNotification() {
-        Context context = requireContext();
+        try {
+            if (!isAdded() || getContext() == null) return;
 
-        SharedPreferences planPrefs = context.getSharedPreferences(WELLNESS_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences userPrefs = context.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
+            Context context = requireContext();
 
-        String currentPlan = planPrefs.getString("current_plan", "");
-        boolean notificationsEnabled = userPrefs.getBoolean("notifications_enabled", true);
+            SharedPreferences planPrefs = context.getSharedPreferences(WELLNESS_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences userPrefs = context.getSharedPreferences(USER_PREFS, Context.MODE_PRIVATE);
 
-        Log.d("currentPlan", "Current Plan: " + currentPlan);
-        Log.d("notificationsEnabled", "Notifications Enabled: " + notificationsEnabled);
+            String currentPlan = planPrefs.getString("current_plan", "");
+            boolean notificationsEnabled = userPrefs.getBoolean("notifications_enabled", true);
 
-        if (!currentPlan.isEmpty() && notificationsEnabled) {
-            Intent intent = new Intent(context, NotificationReceiver.class);
-            intent.putExtra("title", "Daily Reminder");
-            intent.putExtra("message", "Check your wellness plan for today!");
+            Log.d(TAG, "Current Plan: " + currentPlan);
+            Log.d(TAG, "Notifications Enabled: " + notificationsEnabled);
 
-            int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                pendingIntentFlags |= PendingIntent.FLAG_IMMUTABLE;
+            if (!currentPlan.isEmpty() && notificationsEnabled) {
+                Intent intent = new Intent(context, NotificationReceiver.class);
+                intent.putExtra("title", "Daily Reminder");
+                intent.putExtra("message", "Check your wellness plan for today!");
+
+                int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    pendingIntentFlags |= PendingIntent.FLAG_IMMUTABLE;
+                }
+
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, pendingIntentFlags);
+                AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.HOUR_OF_DAY, 8);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+
+                if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
+                    calendar.add(Calendar.DAY_OF_MONTH, 1);
+                }
+
+                if (alarmManager != null) {
+                    Log.d(TAG, "Notification set for: " + calendar.getTime().toString());
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                }
             }
-
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, pendingIntentFlags);
-            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.HOUR_OF_DAY, 8);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-
-            if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
-                calendar.add(Calendar.DAY_OF_MONTH, 1);
-            }
-
-            if (alarmManager != null) {
-                Log.d("NotificationSetup", "Notification set for: " + calendar.getTime().toString());
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error in setupDailyNotification: ", e);
         }
     }
 
@@ -137,8 +186,26 @@ public class plan extends Fragment {
     }
 
     private void openCategory(String categoryName) {
-        Intent intent = new Intent(getActivity(), CategoryActivity.class);
-        intent.putExtra("category_name", categoryName);
-        startActivity(intent);
+        try {
+            if (!isAdded() || getActivity() == null) return;
+
+            Intent intent = new Intent(getActivity(), CategoryActivity.class);
+            intent.putExtra("category_name", categoryName);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Error in openCategory: ", e);
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Log.d(TAG, "Fragment attached");
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d(TAG, "Fragment detached");
     }
 }
