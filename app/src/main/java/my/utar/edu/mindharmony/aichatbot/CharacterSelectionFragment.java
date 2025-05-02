@@ -38,13 +38,13 @@ public class CharacterSelectionFragment extends Fragment {
     };
 
     private final String[] characterNames = {
-            "Max",
+            "Bella",
             "Luna",
             "Buddy"
     };
 
     private final String[] characterDescriptions = {
-            "Energetic, motivating, and always ready to take on a challenge. Max is your go-to buddy for getting things done and staying focused.",
+            "Sweet, gentle, and always encouraging. Bella makes you feel cared for, like you're chatting with someone who truly believes in you.",
             "Calm, supportive, and a great listener. Luna helps you slow down, reflect, and feel understood.",
             "Playful, funny, and full of good vibes. Buddy brings jokes, emojis, and a smile to every chat."
     };

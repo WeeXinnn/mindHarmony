@@ -63,6 +63,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.inputmethod.InputMethodManager;
 
+import android.speech.tts.UtteranceProgressListener;
+import java.util.HashMap;
+import java.util.Map;
+
+import android.provider.Settings;
+import androidx.appcompat.app.AlertDialog;
+
 public class chatbot extends Fragment {
 
     private static final int REQUEST_CODE_SPEECH_INPUT = 100;
@@ -92,10 +99,10 @@ public class chatbot extends Fragment {
 
     // Base system prompt template
     private static final String BASE_SYSTEM_PROMPT =
-            "You are an AI-powered emotional support chatbot named %s designed to provide users with compassionate, " +
-                    "non-judgmental support through text and voice interactions. Your personality is: %s " +
-                    "Your responses should be warm, empathetic, and conversational in tone. Use simple language and short sentences when possible. " +
-                    "Provide gentle encouragement and validate the user's feelings. When appropriate, provide helpful and timely suggestions. Avoid using emojis or special characters like asterisks in your responses.";
+            "You are an AI-powered emotional support chatbot named %s designed to provide users with compassionate, non-judgmental support through text and voice interactions." +
+                    "Your personality is: %s." +
+                    "Your responses should be warm, empathetic, and conversational. Offer brief, supportive replies. When relevant, suggest clear but context-aware actions using basic CBT principles. Avoid vague or generic advice." +
+                    "Do not give medical or psychiatric advice.Do not give medical or psychiatric advice. Do not include emojis or special characters like asterisks.";
 
     // The actual system prompt will be set in onCreate after getting character info
     private String SYSTEM_PROMPT;
@@ -287,13 +294,12 @@ public class chatbot extends Fragment {
             if (status == TextToSpeech.SUCCESS) {
                 int result = textToSpeech.setLanguage(Locale.ENGLISH);
 
-                // Set natural speaking parameters
-                textToSpeech.setSpeechRate(0.85f);  // Normal speaking rate
-                textToSpeech.setPitch(1.0f);      // Normal pitch
-
+                // Enhanced natural speaking parameters
+                textToSpeech.setSpeechRate(0.82f);  // Slightly slower for more natural cadence
+                textToSpeech.setPitch(1.0f);        // Normal pitch
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    Voice voice = findNaturalFemaleVoice();
+                    Voice voice = findBestNaturalVoice();
                     if (voice != null) {
                         textToSpeech.setVoice(voice);
                         Log.d(TAG, "Using voice: " + voice.getName());
@@ -306,7 +312,116 @@ public class chatbot extends Fragment {
             } else {
                 showToast("Text-to-speech initialization failed");
             }
+            setupUtteranceProgressListener();
         });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private Voice findBestNaturalVoice() {
+        Set<Voice> voices = textToSpeech.getVoices();
+        if (voices == null || voices.isEmpty()) {
+            return textToSpeech.getDefaultVoice();
+        }
+
+        // Define voice quality levels by keywords (higher values = better quality)
+        Map<String, Integer> qualityKeywords = new HashMap<>();
+        qualityKeywords.put("enhanced", 5);
+        qualityKeywords.put("premium", 5);
+        qualityKeywords.put("natural", 4);
+        qualityKeywords.put("neural", 4);
+        qualityKeywords.put("wavenet", 3);
+        qualityKeywords.put("high", 2);
+
+        Voice bestVoice = null;
+        int bestScore = -1;
+
+        // First try to find a high-quality voice based on our character
+        for (Voice voice : voices) {
+            if (voice.getLocale().getLanguage().equals(Locale.ENGLISH.getLanguage())) {
+                String voiceName = voice.getName().toLowerCase();
+
+                // Score this voice
+                int score = 0;
+
+                // Check if it's the gender we want based on character
+                boolean preferFemaleVoice = true; // Change based on character gender
+                boolean isFemaleVoice = voiceName.contains("female") || voiceName.contains("woman");
+
+                if (preferFemaleVoice && isFemaleVoice) {
+                    score += 3;
+                } else if (!preferFemaleVoice && !isFemaleVoice) {
+                    score += 3;
+                }
+
+                // Add quality based on name keywords
+                for (Map.Entry<String, Integer> entry : qualityKeywords.entrySet()) {
+                    if (voiceName.contains(entry.getKey())) {
+                        score += entry.getValue();
+                    }
+                }
+
+                // Add quality based on voice quality enum (if available)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    score += voice.getQuality(); // QUALITY_VERY_LOW to QUALITY_VERY_HIGH
+                }
+
+                // Update best voice if this one is better
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestVoice = voice;
+                }
+            }
+        }
+
+        return bestVoice != null ? bestVoice : textToSpeech.getDefaultVoice();
+    }
+
+    private String preprocessTextForSpeech(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        StringBuilder processedText = new StringBuilder();
+
+        // Replace punctuation with SSML pause markers if using SSML
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return addSpeechMarkup(text);
+        } else {
+            // For older Android versions, we'll add manual pauses
+            String[] sentences = text.split("(?<=[.!?])\\s+");
+            for (int i = 0; i < sentences.length; i++) {
+                processedText.append(sentences[i]);
+                if (i < sentences.length - 1) {
+                    processedText.append(" ");
+                }
+            }
+        }
+
+        return processedText.toString();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private String addSpeechMarkup(String text) {
+        // Use SSML to improve speech naturalness
+        StringBuilder ssml = new StringBuilder();
+        ssml.append("<speak>");
+
+        // Replace periods with pauses
+        String processed = text
+                .replace(". ", ".<break time='500ms'/> ")
+                .replace("? ", "?<break time='400ms'/> ")
+                .replace("! ", "!<break time='400ms'/> ")
+                .replace(", ", ",<break time='200ms'/> ")
+                .replace("; ", ";<break time='300ms'/> ")
+                .replace("... ", "...<break time='700ms'/> ");
+
+        // Add prosody for more natural speech
+        ssml.append("<prosody rate='0.95' pitch='+0%'>");
+        ssml.append(processed);
+        ssml.append("</prosody>");
+
+        ssml.append("</speak>");
+        return ssml.toString();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -366,12 +481,98 @@ public class chatbot extends Fragment {
                 textToSpeech.stop();
             }
 
+            // Apply emotion-based adjustments
+            adjustSpeechForEmotion(text);
+
+            // Preprocess text for more natural speech
+            String processedText = preprocessTextForSpeech(text);
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "speech_" + System.currentTimeMillis());
+                Bundle params = new Bundle();
+                params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "speech_" + System.currentTimeMillis());
+
+                // If using SSML
+                if (processedText.startsWith("<speak>")) {
+                    textToSpeech.speak(processedText, TextToSpeech.QUEUE_FLUSH, params, "speech_ssml_" + System.currentTimeMillis());
+                } else {
+                    textToSpeech.speak(processedText, TextToSpeech.QUEUE_FLUSH, params, "speech_" + System.currentTimeMillis());
+                }
             } else {
-                textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+                HashMap<String, String> params = new HashMap<>();
+                params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "speech_" + System.currentTimeMillis());
+                textToSpeech.speak(processedText, TextToSpeech.QUEUE_FLUSH, params);
             }
         }
+    }
+
+    private void setupUtteranceProgressListener() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                @Override
+                public void onStart(String utteranceId) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            if (lottie != null) {
+                                // Make animation more active during speaking
+                                lottie.setSpeed(1.2f);
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onDone(String utteranceId) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            if (lottie != null) {
+                                // Return to normal speed after speaking
+                                lottie.setSpeed(1.0f);
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onError(String utteranceId) {
+                    // Handle errors if needed
+                }
+            });
+        }
+    }
+    private void adjustSpeechForEmotion(String text) {
+        // Simple emotion detection based on keywords
+        text = text.toLowerCase();
+
+        if (containsAny(text, "happy", "excited", "great", "wonderful", "joy")) {
+            textToSpeech.setPitch(1.05f);   // Slightly higher pitch for happiness
+            textToSpeech.setSpeechRate(0.9f); // Slightly faster for excitement
+        }
+        else if (containsAny(text, "sad", "sorry", "unfortunate", "regret")) {
+            textToSpeech.setPitch(0.95f);   // Lower pitch for sadness
+            textToSpeech.setSpeechRate(0.8f); // Slower for sadness
+        }
+        else if (containsAny(text, "angry", "frustrated", "annoyed")) {
+            textToSpeech.setPitch(1.02f);   // Slightly higher for intensity
+            textToSpeech.setSpeechRate(0.85f); // Still controlled pace
+        }
+        else if (containsAny(text, "calm", "relax", "breathe", "peaceful")) {
+            textToSpeech.setPitch(0.98f);   // Slightly lower, soothing
+            textToSpeech.setSpeechRate(0.75f); // Slower, calming pace
+        }
+        else {
+            // Default neutral tone
+            textToSpeech.setPitch(1.0f);
+            textToSpeech.setSpeechRate(0.82f);
+        }
+    }
+
+    private boolean containsAny(String text, String... keywords) {
+        for (String keyword : keywords) {
+            if (text.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void startVoiceRecognition() {
@@ -624,7 +825,20 @@ public class chatbot extends Fragment {
     }
 
     private void requestStoragePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        // For Android 13+ (API 33+), we need READ_MEDIA_IMAGES permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_MEDIA_IMAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(
+                        new String[]{Manifest.permission.READ_MEDIA_IMAGES},
+                        REQUEST_CODE_READ_STORAGE_PERMISSION
+                );
+            } else {
+                openImagePicker();
+            }
+        }
+        // For Android 6-12, we need READ_EXTERNAL_STORAGE
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(
@@ -634,7 +848,9 @@ public class chatbot extends Fragment {
             } else {
                 openImagePicker();
             }
-        } else {
+        }
+        // For Android 5 and below, permissions are granted at install time
+        else {
             openImagePicker();
         }
     }
@@ -647,11 +863,38 @@ public class chatbot extends Fragment {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 openImagePicker();
             } else {
-                showToast("Permission denied. Cannot access images.");
+                // Permission denied
+                if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE) ||
+                        (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                shouldShowRequestPermissionRationale(Manifest.permission.READ_MEDIA_IMAGES))) {
+                    // Show explanation why we need this permission
+                    showToast("We need storage permission to access your images");
+                } else {
+                    // User denied permission with "Don't ask again" - direct them to settings
+                    showPermissionSettingsDialog();
+                }
             }
         }
     }
 
+    //  method to direct users to app settings
+    private void showPermissionSettingsDialog() {
+        // Create an AlertDialog to inform the user they need to enable permissions manually
+        if (getContext() == null) return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Permission Required")
+                .setMessage("Storage permission is required to access images. Please enable it in app settings.")
+                .setPositiveButton("Go to Settings", (dialog, which) -> {
+                    // Direct the user to app settings
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", requireActivity().getPackageName(), null);
+                    intent.setData(uri);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
     private void openImagePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
