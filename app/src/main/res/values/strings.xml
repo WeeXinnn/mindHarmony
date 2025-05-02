@@ -57,4 +57,19 @@
     <string name="today_s_completed_activities">Today\'s completed activities:</string>
     <string name="total_points">Total points:</string>
     <string name="Category">Category</string>
+    <string name="save">Save Journal Entry</string>
+    <string name="view_journal_history">View Journal History</string>
+    <string name="view_calendar">Calendar</string>
+    <string name="streak_message">Keep it up! Your streak helps build better habits.</string>
+    <string name="mood_trend">Mood Trend</string>
+    <string name="weekly_average">Weekly average mood</string>
+    <string name="select_mood">Select your mood</string>
+    <string name="streak_0_days">Streaks</string>
+    <string name="streak_days">"Total Streaks: "</string>
+    <string name="emoji_description_placeholder">Emoji image</string>
+    <string name="angry">Angry</string>
+    <string name="a_bit_angry">A bit Angry</string>
+    <string name="no_feeling">Feeling Normal</string>
+    <string name="a_bit_happy">A bit Happy</string>
+    <string name="very_happy">Very Happy</string>
 </resources>
