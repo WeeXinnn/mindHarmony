@@ -48,6 +48,16 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+// Add these imports at the top of your file, after the existing imports
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.annotation.NonNull;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
 public class chatbot extends Fragment {
 
     private static final int REQUEST_CODE_SPEECH_INPUT = 100;
@@ -68,6 +78,7 @@ public class chatbot extends Fragment {
 
     private TextToSpeech textToSpeech;
     private boolean isSpeechMuted = false;
+
     private static final String API_KEY = BuildConfig.GEMINI_API_KEY;
 
     private int characterAnimationResource = R.raw.dog1;
@@ -99,6 +110,9 @@ public class chatbot extends Fragment {
 
     private static final String CRISIS_FOLLOWUP =
             "Your safety is important. I strongly encourage you to reach out to the suicide and crisis lifeline.";
+
+    private static final int REQUEST_CODE_IMAGE_PICK = 200;
+    private static final int REQUEST_CODE_READ_STORAGE_PERMISSION = 300;
 
     public chatbot() {
         // Required empty constructor
@@ -203,13 +217,9 @@ public class chatbot extends Fragment {
 
         voiceInputButton.setOnClickListener(v -> startVoiceRecognition());
 
-        photoButton.setOnClickListener(v -> {
-            showToast("Photo input functionality not implemented yet");
-        });
-
-        photoButtonAlt.setOnClickListener(v -> {
-            showToast("Photo input functionality not implemented yet");
-        });
+        // Update photo button listeners
+        photoButton.setOnClickListener(v -> requestStoragePermission());
+        photoButtonAlt.setOnClickListener(v -> requestStoragePermission());
     }
 
     private void handleBackButtonFallback() {
@@ -347,6 +357,7 @@ public class chatbot extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_SPEECH_INPUT && resultCode == Activity.RESULT_OK && data != null) {
+            // Existing speech recognition handling
             ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             if (result != null && !result.isEmpty()) {
                 String recognizedText = result.get(0);
@@ -360,6 +371,12 @@ public class chatbot extends Fragment {
                     textInputLayout.setVisibility(View.GONE);
                     iconInputLayout.setVisibility(View.VISIBLE);
                 }, 2000);
+            }
+        }
+        else if (requestCode == REQUEST_CODE_IMAGE_PICK && resultCode == Activity.RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+            if (imageUri != null) {
+                handleImageSelection(imageUri);
             }
         }
     }
@@ -433,7 +450,7 @@ public class chatbot extends Fragment {
             });
         }
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
         MediaType mediaType = MediaType.parse("application/json");
 
         String requestBodyJson;
@@ -572,6 +589,241 @@ public class chatbot extends Fragment {
             });
         }
     }
+
+    private void requestStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        REQUEST_CODE_READ_STORAGE_PERMISSION
+                );
+            } else {
+                openImagePicker();
+            }
+        } else {
+            openImagePicker();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_READ_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openImagePicker();
+            } else {
+                showToast("Permission denied. Cannot access images.");
+            }
+        }
+    }
+
+    private void openImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        startActivityForResult(intent, REQUEST_CODE_IMAGE_PICK);
+    }
+
+
+    // Updated method to handle image selection and conversion to base64
+    private void handleImageSelection(Uri imageUri) {
+        try {
+            // Show loading state
+            responseView.setText("Processing image...");
+
+            // Convert image to base64 with proper encoding
+            InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
+            if (inputStream == null) {
+                responseView.setText("Error: Could not open image file");
+                return;
+            }
+
+            // Resize the image before encoding to avoid large data sizes
+            Bitmap originalBitmap = BitmapFactory.decodeStream(inputStream);
+            inputStream.close();
+
+            // Scale down the image if it's too large
+            Bitmap resizedBitmap = resizeImageIfNeeded(originalBitmap, 1024, 1024);
+
+            // Convert to byte array with proper compression
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream);
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+            // Use proper Base64 encoding
+            String base64Image = Base64.encodeToString(byteArray, Base64.NO_WRAP);
+
+            // Send image to Gemini
+            sendImageToGemini(base64Image);
+
+        } catch (Exception e) {
+            responseView.setText("Error processing image: " + e.getMessage());
+            Log.e(TAG, "Image processing error", e);
+        }
+    }
+
+    // Helper method to resize large images
+    private Bitmap resizeImageIfNeeded(Bitmap image, int maxWidth, int maxHeight) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        if (width <= maxWidth && height <= maxHeight) {
+            return image; // No need to resize
+        }
+
+        float scale = Math.min((float)maxWidth / width, (float)maxHeight / height);
+
+        int newWidth = Math.round(width * scale);
+        int newHeight = Math.round(height * scale);
+
+        return Bitmap.createScaledBitmap(image, newWidth, newHeight, true);
+    }
+
+    // Updated method to send image to Gemini API
+    private void sendImageToGemini(String base64Image) {
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY;
+        MediaType mediaType = MediaType.parse("application/json");
+
+        try {
+            JSONObject requestBody = new JSONObject();
+            JSONArray contents = new JSONArray();
+
+            // System prompt
+            JSONObject systemMessage = new JSONObject();
+            JSONArray systemParts = new JSONArray();
+            JSONObject systemTextPart = new JSONObject();
+            systemTextPart.put("text", SYSTEM_PROMPT +
+                    " When responding to images, describe what you see in a friendly, supportive way " +
+                    "that matches your personality. If the image contains text, read it carefully and respond appropriately.");
+            systemParts.put(systemTextPart);
+            systemMessage.put("role", "user");
+            systemMessage.put("parts", systemParts);
+            contents.put(systemMessage);
+
+            // Model acknowledgment
+            JSONObject modelMessage = new JSONObject();
+            JSONArray modelParts = new JSONArray();
+            JSONObject modelTextPart = new JSONObject();
+            modelTextPart.put("text", "I understand my role as " + characterName +
+                    ". I'll respond to images with my characteristic personality.");
+            modelParts.put(modelTextPart);
+            modelMessage.put("role", "model");
+            modelMessage.put("parts", modelParts);
+            contents.put(modelMessage);
+
+            // User message with image
+            JSONObject userMessage = new JSONObject();
+            JSONArray userParts = new JSONArray();
+
+            // Text instruction
+            JSONObject instructionPart = new JSONObject();
+            instructionPart.put("text", "Please look at this image and respond as " + characterName);
+            userParts.put(instructionPart);
+
+            // Image part - using correct field names based on Gemini API
+            JSONObject imagePart = new JSONObject();
+            JSONObject inlineData = new JSONObject();
+            inlineData.put("mimeType", "image/jpeg"); // Corrected from "mime_type"
+            inlineData.put("data", base64Image);
+            imagePart.put("inlineData", inlineData); // Corrected from "inline_data"
+            userParts.put(imagePart);
+
+            userMessage.put("role", "user");
+            userMessage.put("parts", userParts);
+            contents.put(userMessage);
+
+            requestBody.put("contents", contents);
+
+            // Generation config
+            JSONObject generationConfig = new JSONObject();
+            generationConfig.put("temperature", 0.7);
+            generationConfig.put("topK", 40);
+            generationConfig.put("topP", 0.95);
+            generationConfig.put("maxOutputTokens", 1024);
+            requestBody.put("generationConfig", generationConfig);
+
+            // For debugging purposes, log the request
+            String requestJson = requestBody.toString();
+            Log.d(TAG, "Gemini API Request: " + requestJson);
+
+            RequestBody body = RequestBody.create(mediaType, requestJson);
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .addHeader("Content-Type", "application/json")
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    if (getActivity() == null) return;
+
+                    getActivity().runOnUiThread(() -> {
+                        responseView.setText("Error sending image: " + e.getMessage());
+                    });
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (getActivity() == null) return;
+
+                    if (response.isSuccessful()) {
+                        String responseBody = response.body().string();
+                        try {
+                            JSONObject jsonResponse = new JSONObject(responseBody);
+                            JSONArray candidates = jsonResponse.getJSONArray("candidates");
+                            JSONObject firstCandidate = candidates.getJSONObject(0);
+                            JSONObject content = firstCandidate.getJSONObject("content");
+                            JSONArray parts = content.getJSONArray("parts");
+                            JSONObject firstPart = parts.getJSONObject(0);
+                            String textResponse = firstPart.getString("text");
+
+                            getActivity().runOnUiThread(() -> {
+                                responseView.setText(textResponse);
+                                if (!isSpeechMuted) {
+                                    speakText(textResponse);
+                                }
+                                if (lottie != null) {
+                                    lottie.setSpeed(1.2f);
+                                    lottie.postDelayed(() -> {
+                                        if (lottie != null) {
+                                            lottie.setSpeed(1.0f);
+                                        }
+                                    }, 3000);
+                                }
+                            });
+                        } catch (Exception e) {
+                            Log.e(TAG, "Parse error: " + e.getMessage());
+
+                            getActivity().runOnUiThread(() -> {
+                                responseView.setText("Error parsing image response: " + e.getMessage());
+                            });
+                        }
+                    } else {
+                        String errorBody = response.body().string();
+                        Log.e(TAG, "API error: " + errorBody);
+
+                        getActivity().runOnUiThread(() -> {
+                            responseView.setText("API Error: " + response.code() + " - " + errorBody);
+                        });
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Request creation error: " + e.getMessage());
+
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    responseView.setText("Error creating image request: " + e.getMessage());
+                });
+            }
+        }
+    }
+
+
 
     @Override
     public void onDestroyView() {
