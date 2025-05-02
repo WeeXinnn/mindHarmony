@@ -58,6 +58,11 @@ import android.util.Base64;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
+import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.inputmethod.InputMethodManager;
+
 public class chatbot extends Fragment {
 
     private static final int REQUEST_CODE_SPEECH_INPUT = 100;
@@ -106,7 +111,7 @@ public class chatbot extends Fragment {
 
     private static final String CRISIS_RESPONSE =
             "I'm really concerned about what you're going through. Please know you're not alone and there are people who care and want to help.\n"+
-            "Would you like to connect with the support resources below, or would you prefer to keep talking with me and share more about what's on your mind?";
+                    "Would you like to connect with the support resources below, or would you prefer to keep talking with me and share more about what's on your mind?";
 
     private static final String CRISIS_FOLLOWUP =
             "Your safety is important. I strongly encourage you to reach out to the suicide and crisis lifeline.";
@@ -190,17 +195,46 @@ public class chatbot extends Fragment {
     }
 
     private void setupInputModeToggle() {
+        // Default visibility state
         iconInputLayout.setVisibility(View.VISIBLE);
         textInputLayout.setVisibility(View.GONE);
 
+        // Switch to text input mode when keyboard button is clicked
         keyboardButton.setOnClickListener(v -> {
             iconInputLayout.setVisibility(View.GONE);
             textInputLayout.setVisibility(View.VISIBLE);
             questionInput.requestFocus();
+
+            // Show keyboard automatically
+            if (getActivity() != null) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(questionInput, InputMethodManager.SHOW_IMPLICIT);
+            }
         });
 
+        // Handle microphone button click in text input mode - switch back to icon mode and start voice recognition
         micButtonAlt.setOnClickListener(v -> {
+            // First switch back to icon input mode
+            textInputLayout.setVisibility(View.GONE);
+            iconInputLayout.setVisibility(View.VISIBLE);
+
+            // Then start voice recognition
             startVoiceRecognition();
+        });
+
+        // Listen for text input to show/hide send button based on content
+        questionInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Show send button only when there's text to send
+                sendButton.setVisibility(s.length() > 0 ? View.VISIBLE : View.INVISIBLE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
     }
 
@@ -357,20 +391,19 @@ public class chatbot extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_SPEECH_INPUT && resultCode == Activity.RESULT_OK && data != null) {
-            // Existing speech recognition handling
+            // Voice recognition handling - process directly without showing text input
             ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             if (result != null && !result.isEmpty()) {
                 String recognizedText = result.get(0);
+                // Process the voice input directly
                 sendQuestionToGemini(recognizedText);
-                textInputLayout.setVisibility(View.VISIBLE);
-                iconInputLayout.setVisibility(View.GONE);
-                questionInput.setText(recognizedText);
 
-                questionInput.postDelayed(() -> {
-                    questionInput.setText("");
-                    textInputLayout.setVisibility(View.GONE);
-                    iconInputLayout.setVisibility(View.VISIBLE);
-                }, 2000);
+                // Optional: Show a brief toast indicating the recognized text
+                showToast("Processing: " + recognizedText);
+
+                // Keep the icon input mode visible
+                iconInputLayout.setVisibility(View.VISIBLE);
+                textInputLayout.setVisibility(View.GONE);
             }
         }
         else if (requestCode == REQUEST_CODE_IMAGE_PICK && resultCode == Activity.RESULT_OK && data != null) {
