@@ -58,6 +58,16 @@
             android:name=".MainActivity"
             android:exported="false">
         </activity>
+        <activity android:name=".userwellbeingtracking.NewJournalActivity"
+            android:exported="true" />
+        <activity
+            android:name=".userwellbeingtracking.JournalActivity"
+            android:label="Journal History"
+            android:exported="true"/>
+        <activity
+            android:name=".userwellbeingtracking.CalendarActivity"
+            android:label="Calendar"
+            android:exported="true"/>
 
         <receiver android:name=".notification.NotificationReceiver" android:exported="true" />
     </application>
