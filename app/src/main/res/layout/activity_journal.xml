@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <!-- Add Toolbar with back button -->
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -14,6 +14,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:navigationIcon="@drawable/ic_arrow_back"
         app:title="Journal Entries"
+        app:titleCentered="true"
         app:titleTextColor="@android:color/white" />
 
     <!-- Empty view with no journal entries found -->
