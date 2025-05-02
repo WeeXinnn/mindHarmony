@@ -11,7 +11,7 @@ import java.util.Map;
 import my.utar.edu.mindharmony.aichatbot.CharacterSelectionFragment;
 import my.utar.edu.mindharmony.meditation.meditation;
 import my.utar.edu.mindharmony.profile.profile;
-import my.utar.edu.mindharmony.userwellbeingtracking.userwellbeingtracking;
+import my.utar.edu.mindharmony.userwellbeingtracking.UserWellbeingTrackingFragment;
 import my.utar.edu.mindharmony.wellnessplan.plan;
 
 public class MainActivity extends AppCompatActivity {
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentMap.put(R.id.nav_home, new CharacterSelectionFragment());
         fragmentMap.put(R.id.nav_meditation, new meditation());
         fragmentMap.put(R.id.nav_plan, new plan());
-        fragmentMap.put(R.id.nav_mood, new userwellbeingtracking());
+        fragmentMap.put(R.id.nav_mood, new UserWellbeingTrackingFragment());
         fragmentMap.put(R.id.nav_profile, new profile());
 
         navBar.setOnItemSelectedListener(item -> {
