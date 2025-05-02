@@ -165,6 +165,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/create_my_plan"
                 android:layout_marginTop="24dp"
+                android:textStyle="bold"
                 android:backgroundTint="@color/green"/>
 
         </LinearLayout>
