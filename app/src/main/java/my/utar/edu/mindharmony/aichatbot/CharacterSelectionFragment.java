@@ -1,5 +1,7 @@
 package my.utar.edu.mindharmony.aichatbot;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +12,9 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.airbnb.lottie.LottieAnimationView;
+import com.google.android.material.imageview.ShapeableImageView;
 import my.utar.edu.mindharmony.R;
+import my.utar.edu.mindharmony.profile.profile;
 
 public class CharacterSelectionFragment extends Fragment {
     private LottieAnimationView characterAnimation;
@@ -19,9 +23,12 @@ public class CharacterSelectionFragment extends Fragment {
     private ImageButton leftArrowButton;
     private ImageButton rightArrowButton;
     private Button letsChatButton;
-
     private TextView titleText;
+    private ShapeableImageView profileImage;
 
+    // SharedPreferences constants (same as in profile fragment)
+    private static final String PREF_NAME = "UserPrefs";
+    private static final String KEY_USERNAME = "username";
 
     // Available character resources
     private final int[] characterAnimations = {
@@ -61,9 +68,16 @@ public class CharacterSelectionFragment extends Fragment {
         leftArrowButton = view.findViewById(R.id.leftArrowButton);
         rightArrowButton = view.findViewById(R.id.rightArrowButton);
         letsChatButton = view.findViewById(R.id.letsChatButton);
+        titleText = view.findViewById(R.id.titleText);
+        profileImage = view.findViewById(R.id.profile_image);
 
-        TextView titleText = view.findViewById(R.id.titleText);
-        titleText.setText("👋 Hi, " + "userName");
+        // Get the username from SharedPreferences
+        // Use the same default value as in the profile class
+        SharedPreferences sharedPreferences = requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        String username = sharedPreferences.getString(KEY_USERNAME, "User12345678");
+
+        // Set the greeting with the username
+        titleText.setText("👋 Hi, " + username);
 
         // Set the images folder for Lottie
         characterAnimation.setImageAssetsFolder("images/");
@@ -80,6 +94,15 @@ public class CharacterSelectionFragment extends Fragment {
         rightArrowButton.setOnClickListener(v -> {
             currentCharacterIndex = (currentCharacterIndex + 1) % characterAnimations.length;
             updateCharacterDisplay();
+        });
+
+        // Set up profile image click listener to navigate to profile fragment
+        profileImage.setOnClickListener(v -> {
+            profile profileFragment = new profile();
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, profileFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         });
 
         // Set up chat button listener
@@ -113,5 +136,14 @@ public class CharacterSelectionFragment extends Fragment {
         if (currentCharacterIndex < characterDescriptions.length) {
             descriptionText.setText(characterDescriptions[currentCharacterIndex]);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        SharedPreferences sharedPreferences = requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        String username = sharedPreferences.getString(KEY_USERNAME, "User12345678");
+        titleText.setText("👋 Hi, " + username);
     }
 }
