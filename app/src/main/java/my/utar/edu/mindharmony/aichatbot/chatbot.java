@@ -91,6 +91,7 @@ public class chatbot extends Fragment {
     private TextToSpeech textToSpeech;
     private boolean isSpeechMuted = false;
 
+    // The API key in local.properties keeps it secure by preventing accidental exposure in version control and allows for easier management across different environments.
     private static final String API_KEY = BuildConfig.GEMINI_API_KEY;
 
     private int characterAnimationResource = R.raw.dog1;
