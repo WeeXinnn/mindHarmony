@@ -37,6 +37,36 @@
         </activity>
 
         <activity
+            android:name=".mindfulness.SleepAdapter"
+            android:exported="false" />
+        <activity
+            android:name=".mindfulness.SleepItem"
+            android:exported="false" />
+        <activity
+            android:name=".mindfulness.RelaxFragment"
+            android:exported="false" />
+        <activity
+            android:name=".mindfulness.MoodBoosterFragment"
+            android:exported="false" />
+        <activity
+            android:name=".mindfulness.SleepFragment"
+            android:exported="false" />
+        <activity
+            android:name=".mindfulness.StudyWorkFragment"
+            android:exported="false" />
+        <activity
+            android:name=".mindfulness.TimerFragment"
+            android:exported="false" />
+        <activity
+            android:name=".mindfulness.FocusFragment"
+            android:exported="false" />
+        <activity
+            android:name=".mindfulness.MeditationFragment"
+            android:exported="false" />
+        <activity
+            android:name=".activity_home"
+            android:exported="false" />
+        <activity
             android:name=".wellnessplan.Badge"
             android:exported="false" />
         <activity

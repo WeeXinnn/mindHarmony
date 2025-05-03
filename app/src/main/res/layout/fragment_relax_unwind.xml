@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/relaxRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_purple_5"
+    android:padding="16dp">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarRelax"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@android:color/transparent"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:title="Relax mode"
+        app:titleTextAppearance="@style/TextHeadline" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/chipSound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sound: Chirping Birds"
+        android:layout_below="@id/toolbarRelax"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"/>
+
+    <FrameLayout
+        android:id="@+id/breathContainer"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_below="@id/chipSound"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp">
+
+        <View
+            android:id="@+id/circle_x_large"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:layout_gravity="center"
+            android:background="@drawable/circle_x_large_in" />
+
+        <View
+            android:id="@+id/circleLarge"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:background="@drawable/circle_large_in"/>
+
+        <View
+            android:id="@+id/circleMedium"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:background="@drawable/circle_medium_in"/>
+
+        <View
+            android:id="@+id/circleSmall"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:background="@drawable/circle_small_in"/>
+
+        <TextView
+            android:id="@+id/tvBreathLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Breathe In"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_gravity="center"/>
+    </FrameLayout>
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/breathContainer"
+        android:layout_marginTop="94dp" />
+
+    <LinearLayout
+        android:id="@+id/controlsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seekBar"
+        android:layout_marginTop="31dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btnRepeatLeft"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_repeat_left" />
+
+        <ImageButton
+            android:id="@+id/btnPause"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_pause" />
+
+        <ImageButton
+            android:id="@+id/btnRepeatRight"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_repeat_right" />
+    </LinearLayout>
+
+</RelativeLayout>

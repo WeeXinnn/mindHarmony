@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_purple_5"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            style="@style/TextHeadline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textAlignment="center"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
+            android:text="Mindful Space"/>
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            style="@style/TextBodyMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_gravity="center_horizontal"
+            android:textAlignment="center"
+            android:text="Top mindfulness program for you"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardMeditation"
+            style="@style/ProgramCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/card_yellow"
+            android:layout_marginTop="30dp">
+
+            <include
+                android:id="@+id/includeMeditation"
+                layout="@layout/item_program_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:tag="@drawable/img_meditation"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="16dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardFocus"
+            style="@style/ProgramCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/card_green"
+            android:layout_marginTop="30dp">
+
+            <include
+                android:id="@+id/includeFocus"
+                layout="@layout/item_program_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:tag="@drawable/img_focus"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="32dp"/>
+    </LinearLayout>
+</ScrollView>

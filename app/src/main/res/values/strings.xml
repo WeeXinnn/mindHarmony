@@ -8,7 +8,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="user_well_being_tracking">User Well Being Tracking</string>
-    <string name="Meditation">Meditation</string>
+    <string name="Mindfulness">Mindfulness</string>
     <string name="wellness_plan_content">Wellness Plan Content</string>
     <string name="ai_chatbot">AI Chatbot</string>
     <string name="unplug_reset"><![CDATA[Unplug & Reset]]></string>
@@ -72,4 +72,5 @@
     <string name="no_feeling">Feeling Normal</string>
     <string name="a_bit_happy">A bit Happy</string>
     <string name="very_happy">Very Happy</string>
+    <string name="play">Play</string>
 </resources>

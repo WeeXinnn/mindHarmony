@@ -8,7 +8,7 @@
     <item
         android:id="@+id/nav_meditation"
         android:icon="@drawable/meditation"
-        android:title="@string/meditation"/>
+        android:title="@string/Mindfulness"/>
 
     <item
         android:id="@+id/nav_plan"
