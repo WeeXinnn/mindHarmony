@@ -18,7 +18,7 @@
             android:layout_width="0dp"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
-            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIcon="@drawable/ic_arrow_backk"
             app:title="Study / Work"
             app:titleTextAppearance="@style/TextHeadline"
             app:layout_constraintTop_toTopOf="parent"

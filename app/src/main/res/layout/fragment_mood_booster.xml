@@ -16,7 +16,7 @@
             android:id="@+id/toolbarMood"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIcon="@drawable/ic_arrow_backk"
             app:title="Mood Booster"
             app:titleTextAppearance="@style/TextHeadline"/>
 

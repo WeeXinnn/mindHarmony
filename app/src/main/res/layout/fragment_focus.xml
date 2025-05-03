@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
-            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIcon="@drawable/ic_arrow_backk"
             app:title="What’s Your Focus Goal Today?"
             app:titleTextAppearance="@style/TextHeadline" />
 
