@@ -1,8 +1,11 @@
 package my.utar.edu.mindharmony.wellnessplan;
 
+import static android.app.PendingIntent.getActivity;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -82,6 +85,8 @@ public class Questionnaire extends AppCompatActivity {
 
         Toast.makeText(this, "Plan Saved! Activities will be personalized for you.", Toast.LENGTH_SHORT).show();
 
+        Intent intent = new Intent(this, ViewPlan.class);
+        startActivity(intent);
         finish();
     }
 
