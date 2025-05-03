@@ -428,37 +428,6 @@ public class chatbot extends Fragment {
         return ssml.toString();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private Voice findNaturalFemaleVoice() {
-        Set<Voice> voices = textToSpeech.getVoices();
-        if (voices == null) {
-            return textToSpeech.getDefaultVoice();
-        }
-
-        // First try to find a high-quality female voice
-        for (Voice voice : voices) {
-            if (voice.getLocale().getLanguage().equals(Locale.ENGLISH.getLanguage())) {
-                String voiceName = voice.getName().toLowerCase();
-                if ((voiceName.contains("female") || voiceName.contains("woman")) &&
-                        voice.getQuality() >= Voice.QUALITY_HIGH) {
-                    return voice;
-                }
-            }
-        }
-
-        // Then try any female voice
-        for (Voice voice : voices) {
-            if (voice.getLocale().getLanguage().equals(Locale.ENGLISH.getLanguage())) {
-                String voiceName = voice.getName().toLowerCase();
-                if (voiceName.contains("female") || voiceName.contains("woman")) {
-                    return voice;
-                }
-            }
-        }
-
-        // Fallback to default voice
-        return textToSpeech.getDefaultVoice();
-    }
 
     private void setupSpeakerToggleButton() {
         speakerToggleButton.setImageResource(R.drawable.sound_icon);
